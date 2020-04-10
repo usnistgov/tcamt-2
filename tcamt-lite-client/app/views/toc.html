@@ -1,0 +1,191 @@
+<style id="antiClickjack">
+    body {
+        display: none !important;
+    }
+
+
+    .handle-custom{
+        background-color: red;
+    }
+
+</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+<div ui-tree="treeOptions">
+    <ol ui-tree-nodes="" ng-model="testplans" data-empty-placeholder-enabled>
+        <li ng-repeat="test in testplans" ui-tree-node>
+            <div ui-tree-handle>
+                <div context-menu="testPlanOptions" style="margin-left:5px;">
+                <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}">
+				</i>
+<span class="label label-sub-component label-icon">TP</span> </span> <span data-nodrag ng-class="{'selected1' : this.$modelValue===activeModel,'unsaved':changesMap[test.id]}"
+    ng-click="Activate(this); editTestPlan(test);">
+						{{test.name}}</span>
+</div>
+</div>
+<!--<div ng-if="test.children.length>0">
+    {{updatePositions(test.children)}}
+</div>-->
+<ol ui-tree-nodes="" ng-model="test.children" data-type="children" data-empty-placeholder-enabled>
+    <li ng-repeat="child in test.children" ui-tree-node ng-include="'render_group.html'" data-type="child" style="margin-left:0px;" ng-if="!collapsed">
+</li>
+</ol>
+
+</li>
+</ol>
+</div>
+<script type="text/ng-template" id="nullView.html">
+<p> Please select any other Element.</p>
+</script>
+
+
+<script type="text/ng-template" id="render_group.html">
+                    <div ui-tree-handle style="margin-left:7px;" ng-if="child.type==='testcasegroup'" data-type="group">
+                     <div context-menu="testGroupOptions">
+                            <i data-nodrag ng-click="toggle(this); print(this) " class="fa" ng-class="{ 'fa-caret-right': collapsed, 'fa-caret-down': !collapsed} "></i>
+                            <span class="label label-success label-icon ">GP</span> 
+                            <span data-nodrag ng-class="{'selected1' : this.$modelValue===activeModel,'unsaved':changesMap[child.id]}" ng-click="Activate(this); selectTestCaseGroup(child);">[{{$index+1}}]{{child.name}}</span>
+                    </div>
+                    </div>
+
+
+                       <div ui-tree-handle style="margin-left:7px;" ng-if="child.type==='testcase'">
+                          <div context-menu="testCaseOptions" data-type="case">
+                             <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+                             <span class="label label-component label-icon draggable">TC</span>
+                             <span data-nodrag ng-class="{'selected1' : this.$modelValue===activeModel,'unsaved':changesMap[child.id]}" ng-click="Activate(this); selectTestCase(child)">[{{$index+1}}]{{child.name}}</span>
+                        </div>
+                    </div>
+
+
+                                <!--<div ng-if="child.teststeps.length>0">
+                					{{updatePositions(child.teststeps)}}
+           						</div>                    -->
+                                    
+                    <ol ui-tree-nodes=" " ng-model="child.teststeps "  ng-if="child.type==='testcase'" data-empty-placeholder-enabled ng-if="!collapsed" data-type="steps" >
+                        <li ng-repeat="step in child.teststeps" ui-tree-node data-type="step" ng-if="!collapsed">
+                            <div ui-tree-handle style="margin-left:21px;">
+                                <div context-menu="testStepOptions">
+                                    <span class="label label-segment label-icon draggable">
+                                        <i title="manual test step" ng-if="!this.$modelValue.type || this.$modelValue.type.includes('MANUAL')" class="fa fa-hand-paper-o" aria-hidden="true"></i>
+                                        <span title="TA_INITIATOR" ng-if="this.$modelValue.type && this.$modelValue.type === 'TA_INITIATOR'" style="font-weight: bold; font-size: large;">→</span>
+                                        <span title="TA_INITIATOR" ng-if="this.$modelValue.type && this.$modelValue.type === 'TA_RESPONDER'" style="font-weight: bold; font-size: large;">⇢</span>
+                                        <span title="TA_INITIATOR" ng-if="this.$modelValue.type && this.$modelValue.type === 'SUT_INITIATOR'" style="font-weight: bold; font-size: large;">←</span>
+                                        <span title="TA_INITIATOR" ng-if="this.$modelValue.type && this.$modelValue.type === 'SUT_RESPONDER'" style="font-weight: bold; font-size: large;">⇠</span>
+                                        <i title="TA_INITIATOR" ng-if="this.$modelValue.type && this.$modelValue.type === 'DATAINSTANCE'" class="fa fa-file" aria-hidden="true"></i>
+                                        TS
+                                    </span>
+                                    <span data-nodrag ng-click="Activate(this); selectTestStep(step);" ng-class="{selected1 : this.$modelValue===activeModel, used : this.$modelValue.conformanceProfileId===message.id||this.$modelValue.integrationProfileId===igdocument.id || this.$modelValue.conformanceProfileId===selectedTemplate.conformanceProfileId, unsaved:changesMap[step.id]} ">
+                                        [{{$index+1}}] {{step.name}}
+                                    </span>
+                                    <span title="Test Step Type missing Error" ng-if="!this.$modelValue.type" style="font-weight: bold; font-size: large; color: red">!</span>
+                                    <span title="Message Profile missing Error" ng-if="this.$modelValue.type && !this.$modelValue.type.includes('MANUAL') && !this.$modelValue.conformanceProfileId" style="font-weight: bold; font-size: large; color: red">!</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
+                            <!--<div ng-if="child.children.length>0">
+                            {{updatePositions(child.children)}}
+                            </div>-->
+
+                       <ol ui-tree-nodes="" ng-model="child.children" data-type="children" data-empty-placeholder-enabled ng-if="child.type==='testcasegroup'">
+                            <li ng-repeat="child in child.children" ui-tree-node ng-include="'render_group.html'" data-type="child" style="margin-left:0px;" ng-if="!collapsed">
+                             </li>
+                       </ol>
+</script>
+
+
+
+<!--<div ui-tree="treeOptions">
+    <ol ui-tree-nodes="" ng-model="testplans" data-empty-placeholder-enabled>
+        <li ng-repeat="test in testplans" ui-tree-node data-type="childrens">
+            <div ui-tree-handle data-type="childrens">
+                <div context-menu="testPlanOptions" data-type="childrens" style="margin-left:5px;">
+                    <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}">
+					</i>
+                    <span class="label label-sub-component label-icon">TP</span> </span> <span data-nodrag ng-class="{'selected1' : this.$modelValue===activeModel,'unsaved':test.isChanged}" ng-click="Activate(this); selectTestPlan(test);">
+						{{test.name}}</span>
+                </div>
+            </div>
+            <div ng-if="test.children.length>0">
+                {{updatePositions(test.children)}}
+            </div>
+            <ol ui-tree-nodes="" ng-model="test.children" data-type="childrens" data-empty-placeholder-enabled >
+                <!--<li ng-repeat="child in test.children " ui-tree-node data-type="child" class="testGroup" ng-hide="$parentNodeScope.collapsed">
+                    <div ng-if="child.children>0">
+                        {{updatePositions(child.children)}}
+                    </div>
+                    <div ui-tree-handle style="margin-left:7px;" ng-if="child.type==='testcasegroup'" data-type="group">
+                        <div context-menu="testGroupOptions" data-type="group">
+                            <i data-nodrag ng-click="toggle(this); print(this) " class="fa" ng-class="{ 'fa-caret-right': collapsed, 'fa-caret-down': !collapsed} "></i>
+                            <span class="label label-success label-icon ">GP</span> <span data-nodrag ng-class="{'selected1' : this.$modelValue===activeModel,'unsaved':changesMap[child.id]}" ng-click="Activate(this); selectTestCaseGroup(child); ">[{{child.position}}]{{child.name}}</span>
+                        </div>
+                    </div>
+
+                    <div ui-tree-handle style="margin-left:7px;" ng-if="child.hasOwnProperty('teststeps')" data-type="case">
+                        <div context-menu="testCaseOptions" data-type="case">
+                            <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+                            <span class="label label-component label-icon draggable">TC</span>
+                            <span data-nodrag ng-class="{'selected1' : this.$modelValue===activeModel,'unsaved':changesMap[child.id]}" ng-click="Activate(this); selectTestCase(child)">[{{child.position}}]{{child.name}}</span>
+                        </div>
+                    </div>
+  
+                    <ol ui-tree-nodes="" ng-model="child.children" ng-if="child.hasOwnProperty('children')" data-type="group" data-empty-placeholder-enabled>
+                					{{updatePositions(child.children)}}
+                        <li ng-hide="$parentNodeScope.collapsed" ng-repeat="case in child.children" ui-tree-node data-type="case">
+                            <div ui-tree-handle style="margin-left:14px;" ng-click=" Activate(this) ">
+                                <div context-menu="testCaseOptions">
+                                    <i data-nodrag ng-click="toggle(this);print(this) " class="fa" ng-class="{ 'fa-caret-right': collapsed, 'fa-caret-down': !collapsed }">
+									</i>
+                                    <span class="label label-component label-icon draggable ">TC</span>
+                                    <span data-nodrag ng-class="{'selected1' : this.$modelValue===activeModel,'unsaved':changesMap[case.id]}" ng-click="Activate(this); selectTestCase(case); ">[{{case.position}}]
+										{{case.name}}</span>
+                                </div>
+                            </div>
+                                   <div ng-if="case.teststeps.length>0">
+                					{{updatePositions(case.teststeps)}}
+           						 </div>
+                            <ol ui-tree-nodes=" " ng-model="case.teststeps " data-type="case">
+                                <li ng-repeat="step in case.teststeps " ui-tree-node data-type="step">
+                                    <div ui-tree-handle style="margin-left:21px;">
+                                        <div context-menu="testStepOptions ">
+                                            <span class="label label-segment label-icon draggable ">TS</span>
+                                            <span data-nodrag ng-click="Activate(this); selectTestStep(step); " ng-class="{selected1 : this.$modelValue===activeModel, used : this.$modelValue.conformanceProfileId===message.id||this.$modelValue.integrationProfileId===igdocument.id || this.$modelValue.conformanceProfileId===selectedTemplate.conformanceProfileId,none : !this.$modelValue.conformanceProfileId ,unsaved:changesMap[step.id]}">
+												[{{step.position}}] {{step.name}}</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ol>-->
+
+<!--<li ng-repeat="child in child.children" ui-tree-node ng-include="'render_group.html'" data-type="group"
+                                 style="margin-left:0px;"></li>
+
+                        </li>
+                    </ol>-->
+<!-- <div ui-tree-handle data-type="group"/> -->
+<!--<div ng-if="child.teststeps.length>0">
+                					{{updatePositions(child.teststeps)}}
+           						 </div>                    
+                                    
+                                    <ol ui-tree-nodes=" " ng-model="child.teststeps " data-type="case" data-empty-placeholder-enabled>
+                        <li ng-repeat="step in child.teststeps " ui-tree-node data-type="step">
+                            <div ui-tree-handle style="margin-left:21px;">
+                                <div context-menu="testStepOptions">
+                                    <span class="label label-segment label-icon draggable">TS</span>
+                                    <span data-nodrag ng-click="Activate(this); selectTestStep(step);" ng-class="{selected1 : this.$modelValue===activeModel, used : this.$modelValue.conformanceProfileId===message.id||this.$modelValue.integrationProfileId===igdocument.id || this.$modelValue.conformanceProfileId===selectedTemplate.conformanceProfileId, unsaved:changesMap[step.id]} ">
+												[{{step.position}}] {{step.name}} </span>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>-->
+<!--</li>
+            </ol>
+        </li>
+    </ol>
+</div>-->

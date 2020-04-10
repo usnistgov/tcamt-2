@@ -1,0 +1,62 @@
+<style id="antiClickjack">body{display:none !important;}</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+    <div class="navbar navbar-default" role="navigation">
+    <div class="brand" id="appheader">
+        <a style="display: inline-block; text-shadow:none" href="#">
+            <div id="apptitle"><div><span msg key="app.title"></span><span style='color:red; font-size:12px'> <span style='color:red; font-size:12px'> {{appInfo.version}}</span></span></div></div>
+        </a>
+    </div>
+    <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+            <li ng-class="activeWhen(path()=='/home')">
+                <a class="point" href="#/home"><i class="fa fa-home"></i>&nbsp;<span msg key="navbar.home"></span></a>
+            </li>
+            <li ng-class="activeWhen(path()=='/tp')"><a class="point" href="#/tp"><i class="fa fa-book"></i>&nbsp;<span msg class="msg" key="navbar.tps"></span></a></li>
+            <li ng-class="activeWhen(path()=='/profiles')"><a class="point" href="#/profiles"><i class="fa fa-book"></i>&nbsp;<span msg class="msg" key="navbar.profiles"></span></a></li>
+            <li ng-class="activeWhen(path()=='/doc')"><a class="point" href="#/doc"><i class="fa fa-file-text"></i>&nbsp;<span msg class="msg" key="navbar.documentation"></span></a></li>
+            <li ng-class="activeWhen(path()=='/about')"><a class="point" href="#/about"><i class="fa fa-info"></i>&nbsp;About</a></li>
+            <li ng-class="activeWhen(path()=='/glossary')"><a class="point" href="#/glossary"><i class="fa fa-file-text"></i>&nbsp;<span msg class="msg" key="navbar.glossary"></span></a></li>
+            <li ng-class="activeWhen(path()=='/config')"><a class="point" href="#/config"><i class="fa fa-file-text"></i>&nbsp;<span msg class="msg" key="navbar.config"></span></a></li>
+            <li ng-class="activeWhen(path()=='/issue')"><a class="point" href="#/issue"><i class="fa fa-question"></i>&nbsp;Issues</a></li>
+            <li ng-show='showSpinner()' ><i class="fa fa-spinner fa-pulse fa-align-center"></i></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right" style="margin-right: 15px">
+            <li class="dropdown clear-fix" ng-show="isAuthenticated()" ng-class="isActive('/useraccount') || isActive('/transport-settings')">
+                <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i
+                        class="fa fa-user"></i>&nbsp;Hello, {{getFullName()}} <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li ng-class="isActive('/useraccount')"><a class="point" href="#/useraccount"><i
+                            class="fa fa-user"></i>&nbsp;My Profile</a></li>
+                    <li class="">
+                        <a class="point" ng-click="logout()"><i class="fa fa-sign-out"></i>&nbsp;<span class="msg">Logout</span></a>
+                    </li>
+                </ul>
+            </li>
+            <li class="dropdown clear-fix" ng-show="!isAuthenticated()" ng-class="isActive('/useraccount') || isActive('/registration') || isActive('/forgotten')">
+                <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i
+                        class="fa fa-user"></i>&nbsp;Hello Guest <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li class="">
+                        <a class="point" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp; <span class="msg">Login</span></a> </li>
+                    <li ng-class="isActive('/registration')">
+                        <a href="#/registration">
+                            <i class="fa fa-user-plus"></i>&nbsp;<span msg key="navbar.registration"></span>
+                        </a>
+                    </li>
+                    <li ng-class="isActive('/forgotten')">
+                        <a href="#/forgotten">
+                            <i class="fa fa-repeat"></i>&nbsp;<span msg key="navbar.forgotten"></span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>

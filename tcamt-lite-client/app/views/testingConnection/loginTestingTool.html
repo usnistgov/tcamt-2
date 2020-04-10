@@ -1,0 +1,104 @@
+<style id="antiClickjack">body {
+    display: none !important;
+}</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+
+
+<md-dialog aria-label="Create New TestPlan" style="width: 50%">
+    <form ng-cloak name="testingLoginForm" id="testingLoginForm" novalidate class="form-horizontal">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>{{mode}} Test Plan</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content>
+
+            <div class="md-dialog-content">
+                <div ng-show="step==1">
+                <div class="alert alert-danger row" ng-show="alert" id="ehrloginalert">
+                    <button type="button" class="close" ng-click="initAlert()">×</button>
+                    <div>{{alertText}}</div>
+                </div>
+
+                <div class="form-group control-group row"
+                     ng-class="{'has-success has-feedback': testingLoginForm.username.$valid, 'igl-has-error has-feedback': !testingLoginForm.username.$valid}">
+                    <label class="control-label col-md-2" for="username">
+                        Username
+                    </label>
+
+                    <div class="col-md-10">
+                        <input type="text" class="form-control focus" autofocus id="username" name="username"
+                               ng-model="user.username"
+                               ng-minlength="4" required>
+                    </div>
+                </div>
+                <div class="form-group control-group row"
+                     ng-class="{'has-success has-feedback': testingLoginForm.password.$valid, 'igl-has-error has-feedback': !testingLoginForm.password.$valid}">
+                    <label class="control-label col-md-2" for="password">
+                        Password
+                    </label>
+
+                    <div class="col-md-10">
+                        <input type="password" autocomplete="off"
+                               class="form-control immediate-help account-input focus" id="password" name="password"
+                               ng-model="user.password" ng-minlength="4" required>
+                    </div>
+                </div>
+                </div>
+                <div ng-show="step==2">
+
+                   <label>  Select Scope: </label>
+                    <md-radio-group ng-model="testPlanScope">
+                        <md-radio-button ng-repeat="opt in options" class="md-primary" ng-value="opt.value" style="display: inline-block; margin-left: 30px; margin-right: 30px"> {{opt.label}}
+                        </md-radio-button>
+                    </md-radio-group>
+
+                </div>
+            </div>
+
+        </md-dialog-content>
+
+
+        <md-dialog-actions layout="column" ng-show="step==1">
+            <div layout="row" flex layout-align="end end">
+                <md-button flex ng-click="login(user.username,user.password)" class="btn btn-raised btn-primary"
+                           type="submit"
+                           ng-disabled='!testingLoginForm.$valid'>
+                    <i class="fa fa-sign-in"></i> Login
+                </md-button>
+                <md-button flex class="btn btn-raised btn-warning" ng-click="cancel()">
+                    <i class="fa fa-times"></i> <span msg key="login.button.cancel"></span>
+                </md-button>
+            </div>
+            <div layout="row" flex layout-align="end end" class="pull-right">
+
+                <a flex ng-href="{{testingUrl}}#/forgotten" target="_blank" class="pull-right">
+                    <span> Forgot your Password</span>
+                </a>
+            </div>
+            <div layout="row" flex layout-align="end end" class="pull-right">
+                <a flex ng-href="{{testingUrl}}#/registration" target="_blank" class="pull-right">
+                    <span> Create an Account</span>
+                </a>
+            </div>
+        </md-dialog-actions>
+        <md-dialog-actions layout="column" ng-show="step==2">
+            <div layout="row" flex layout-align="end end">
+                <md-button flex ng-click="submit(user.username,user.password,testPlanScope)"
+                           class="btn btn-raised btn-primary" type="submit">
+                    <i class="fa fa-sign-in"></i> submit
+                </md-button>
+            </div>
+        </md-dialog-actions>
+
+
+    </form>
+</md-dialog>
