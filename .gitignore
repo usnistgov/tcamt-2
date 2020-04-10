@@ -8,7 +8,6 @@ tcamt-lite-client/.tmp/
 tcamt-lite-controller/.classpath
 tcamt-lite-controller/.project
 tcamt-lite-controller/.settings/
-tcamt-lite-controller/src/main/webapp/
 tcamt-lite-controller/target/
 tcamt-lite-domain/target/
 tcamt-lite-repo/target/
