@@ -1,13 +1,11 @@
 tcamt-lite-client/.idea/
 tcamt-lite-client/bower_components/
 tcamt-lite-client/node_modules/
+.classpath
 .project
 .settings/
 tcamt-lite-client/.sass-cache/
 tcamt-lite-client/.tmp/
-tcamt-lite-controller/.classpath
-tcamt-lite-controller/.project
-tcamt-lite-controller/.settings/
 tcamt-lite-controller/target/
 tcamt-lite-domain/target/
 tcamt-lite-repo/target/
