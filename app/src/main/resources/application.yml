@@ -1,0 +1,17 @@
+spring:
+  data:
+    mongodb:
+      database: tcl
+      port: 27017
+      host: localhost
+
+key: 
+  public: /usr/local/etc/hit/auth/publicKey.txt
+    
+email:
+   port: 25
+   protocol: smtp
+   host: smtp.nist.gov
+   admin: robert.snelick@nist.gov
+   from: tcamt@nist.gov
+   subject: NIST TCAMT Notification
