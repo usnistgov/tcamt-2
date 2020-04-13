@@ -28,7 +28,7 @@
 	</dependencies>
 
     <modules>
-        <module>app</module>
+        <module>core</module>
     </modules>
 
 </project>
