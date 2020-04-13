@@ -1,4 +1,4 @@
-package gov.nist.hit.hl7.tcamt.core;
+package gov.nist.hit.hl7.tcamt.bootstrap;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

@@ -2,7 +2,6 @@ package gov.nist.hit.hl7.tcamt.core.controller;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ public class EmployeeController {
 	private final EmployeeRepository repository;
 
 	private final EmployeeModelAssembler assembler;
-	private final OrderModelAssembler orderAssembler;
+	// private final OrderModelAssembler orderAssembler;
 
 	EmployeeController(EmployeeRepository repository,
 					   EmployeeModelAssembler assembler,
@@ -38,7 +37,7 @@ public class EmployeeController {
 		
 		this.repository = repository;
 		this.assembler = assembler;
-		this.orderAssembler = orderAssembler;
+		// this.orderAssembler = orderAssembler;
 	}
 	// end::constructor[]
 
