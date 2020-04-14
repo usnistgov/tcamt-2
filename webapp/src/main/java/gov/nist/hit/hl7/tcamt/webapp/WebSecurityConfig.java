@@ -44,13 +44,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/config/**").permitAll()
                 .antMatchers("/api/documentations/getAll").permitAll()
                 .antMatchers("/api/storage/file").permitAll()
+                .antMatchers("/", "/home").permitAll()
                 /*
 				.antMatchers("/people/**").permitAll()
 				.antMatchers("/employees/**").permitAll()
 				.antMatchers("/orders/**").permitAll()
                 */
                 .antMatchers("/api/**").fullyAuthenticated()
-                .antMatchers("/**").fullyAuthenticated()
                 .and()
             .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
     }
