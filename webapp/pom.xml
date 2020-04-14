@@ -9,7 +9,6 @@
 	</parent>
 
 	<artifactId>webapp</artifactId>
-	<packaging>war</packaging>
 
 	<dependencies>
 		<dependency>
