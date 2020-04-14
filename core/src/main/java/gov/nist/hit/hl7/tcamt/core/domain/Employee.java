@@ -1,13 +1,11 @@
 package gov.nist.hit.hl7.tcamt.core.domain;
 
-import lombok.Data;
-
 import org.springframework.data.annotation.Id;
 
-@Data
 public class Employee {
 
-	@Id private String id;
+	@Id
+	private String id;
 	private String firstName;
 	private String lastName;
 	private String role;
@@ -28,5 +26,37 @@ public class Employee {
 		String[] parts =name.split(" ");
 		this.firstName = parts[0];
 		this.lastName = parts[1];
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 }
