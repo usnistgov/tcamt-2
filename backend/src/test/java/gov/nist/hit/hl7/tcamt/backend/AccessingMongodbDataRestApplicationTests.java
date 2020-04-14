@@ -32,12 +32,14 @@ public class AccessingMongodbDataRestApplicationTests {
 		personRepository.deleteAll();
 	}
 
+	/*
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
 
 		mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.employees").exists());
 	}
+	*/
 
 	@Test
 	public void shouldCreateEntity() throws Exception {

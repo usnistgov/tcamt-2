@@ -6,7 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import gov.nist.hit.hl7.tcamt.core.repository.*;
+import gov.nist.hit.hl7.tcamt.backend.repository.*;
 // import gov.nist.hit.hl7.tcamt.core.domain.*;
 
 @Configuration

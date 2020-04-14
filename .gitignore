@@ -1,0 +1,9 @@
+frontend/bower_components
+.settings
+.project
+.classpath
+target/
+.idea
+.sass-cache
+.tmp
+node_modules

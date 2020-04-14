@@ -28,7 +28,7 @@
 
 		<dependency>
             <groupId>gov.nist.hit.hl7.tcamt</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>backend</artifactId>
             <version>0.0.1-SNAPSHOT</version>
 		</dependency>
 

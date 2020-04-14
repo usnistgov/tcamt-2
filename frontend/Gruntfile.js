@@ -20,7 +20,7 @@ module.exports = function(grunt) {
 	// Configurable paths for the application
 	var appConfig = {
 		app : require('./bower.json').appPath || 'app',
-		dist : '../tcamt-lite-controller/src/main/webapp'
+		dist : '../webapp/src/main/webapp'
 	};
 
 	// Define the configuration for all the tasks
