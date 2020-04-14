@@ -1,4 +1,4 @@
-package gov.nist.hit.hl7.tcamt.core.config;
+package gov.nist.hit.hl7.tcamt.bootstrap;
 
 // import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,24 +10,19 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 // import org.springframework.security.core.userdetails.UserDetailsService;
 // import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-// FIXME : for test
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 
-/*
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import gov.nist.hit.hl7.tcamt.auth.client.config.JWTAuthenticationFilter;
-*/
 
 
 @Configuration
 @EnableWebSecurity
-// FIXME : does it needed?
-// @EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    /*
     @Autowired
     private JWTAuthenticationFilter authFilter;
 
@@ -49,15 +44,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/config/**").permitAll()
                 .antMatchers("/api/documentations/getAll").permitAll()
                 .antMatchers("/api/storage/file").permitAll()
+                /*
 				.antMatchers("/people/**").permitAll()
 				.antMatchers("/employees/**").permitAll()
 				.antMatchers("/orders/**").permitAll()
+                */
                 .antMatchers("/api/**").fullyAuthenticated()
+                .antMatchers("/**").fullyAuthenticated()
                 .and()
             .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
     }
-    */
 
+    /*
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
@@ -91,6 +89,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .withUser("admin").password("{noop}password").roles("USER", "ADMIN");
 
     }
+    */
 
     // FIXME : for-test
     /* for UserDetailed service

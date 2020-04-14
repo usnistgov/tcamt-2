@@ -8,27 +8,20 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 @SpringBootTest
 class TcamtApplicationTests {
-
-    @MockBean
-    private SimpleMailMessage templateMessage;
-
-    @MockBean
-    private JavaMailSender mailSender;
-
 	@Test
 	void contextLoads() {
 	}
 
     @SpringBootApplication
-    @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class,
-    DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
+    @EnableAutoConfiguration(exclude = {
+        DataSourceAutoConfiguration.class,
+        DataSourceTransactionManagerAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class,
+        SecurityAutoConfiguration.class })
     static class TestConfiguration {
     }
 }
