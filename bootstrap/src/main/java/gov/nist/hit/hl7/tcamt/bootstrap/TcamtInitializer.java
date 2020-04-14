@@ -1,16 +1,16 @@
 package gov.nist.hit.hl7.tcamt.bootstrap;
 
-import lombok.extern.slf4j.Slf4j;
+// import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import gov.nist.hit.hl7.tcamt.core.repository.*;
-import gov.nist.hit.hl7.tcamt.core.domain.*;
+// import gov.nist.hit.hl7.tcamt.core.domain.*;
 
 @Configuration
-@Slf4j
+// @Slf4j
 class TcamtInitializer {
 
 	@Bean

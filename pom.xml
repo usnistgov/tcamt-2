@@ -40,6 +40,7 @@
 	</dependencies>
 
     <modules>
+        <module>auth-client</module>
         <module>core</module>
         <module>bootstrap</module>
     </modules>
