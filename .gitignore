@@ -1,9 +1,35 @@
-frontend/bower_components
-.settings
-.project
-.classpath
 target/
-.idea
+!**/src/main/**
+!**/src/test/**
+
 .sass-cache
 .tmp
-node_modules
+frontend/bower_components
+frontend/node_modules
+webapp/src/main/webapp
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### VS Code ###
+.vscode/
