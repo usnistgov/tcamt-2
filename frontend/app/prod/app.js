@@ -475,7 +475,7 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
     $rootScope.$on('event:logoutRequest', function () {
         httpHeaders.common['Authorization'] = null;
         userInfoService.setCurrentUser(null);
-        $http.get('j_spring_security_logout');
+        $http.get('api/logout');
     });
 
     /**
