@@ -2,7 +2,7 @@
 
 angular.module('tcl').factory('userInfo', ['$resource',
     function ($resource) {
-        return $resource('api/accounts/cuser');
+        return $resource('api/authentication');
     }
 ]);
 
@@ -12,6 +12,8 @@ angular.module('tcl').factory('userLoaderService', ['userInfo', '$q',
             var delay = $q.defer();
             userInfo.get({},
                 function(theUserInfo) {
+                    theUserInfo.fullName = theUserInfo.username;
+                    theUserInfo.accountId = 10;
                     delay.resolve(theUserInfo);
                 },
                 function() {
@@ -118,7 +120,7 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
         };
 
         var isAuthenticated = function() {
-        	var res =  currentUser !== undefined && currentUser != null && currentUser.authenticated === true;
+        	var res =  currentUser !== undefined && currentUser != null;
              return res;
         };
 

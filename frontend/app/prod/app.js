@@ -245,7 +245,7 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
                 if (response.status === 401) {
                     //We catch everything but this one. So public users are not bothered
                     //with a login windows when browsing home.
-                    if (response.config.url !== 'api/accounts/cuser') {
+                    if (response.config.url !== 'api/authentication') {
                         //We don't intercept this request
                         if (response.config.url !== 'api/accounts/login') {
                             var deferred = $q.defer(),
@@ -429,13 +429,15 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
         httpHeaders.common['Accept'] = 'application/json';
         httpHeaders.common['Authorization'] = 'Basic ' + base64.encode(username + ':' + password);
 
-        $http.get('api/accounts/login').success(function () {
-            //If we are here in this callback, login was successfull
-            //Let's get user info now
-            httpHeaders.common['Authorization'] = null;
-            $http.get('api/accounts/cuser').then(function (result) {
+        var loginObj = {username: username, password: password};
+        $http.post('api/login', loginObj).then(function (response) {
+            console.log(response);
+            $http.get('api/authentication').then(function (result) {
+                console.log(result);
                 if (result.data && result.data != null) {
                     var rs = angular.fromJson(result.data);
+                    rs.fullName = username;
+                    rs.accountId = 10;
                     userInfoService.setCurrentUser(rs);
                     $rootScope.$broadcast('event:loginConfirmed');
                 } else {
@@ -444,7 +446,27 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
             }, function () {
                 userInfoService.setCurrentUser(null);
             });
+        }, function (error) {
+            Notification.error({message:"Failed to login", delay:1000});
         });
+
+
+        // $http.get('api/login').success(function () {
+        //     //If we are here in this callback, login was successfull
+        //     //Let's get user info now
+        //     httpHeaders.common['Authorization'] = null;
+        //     $http.get('api/accounts/cuser').then(function (result) {
+        //         if (result.data && result.data != null) {
+        //             var rs = angular.fromJson(result.data);
+        //             userInfoService.setCurrentUser(rs);
+        //             $rootScope.$broadcast('event:loginConfirmed');
+        //         } else {
+        //             userInfoService.setCurrentUser(null);
+        //         }
+        //     }, function () {
+        //         userInfoService.setCurrentUser(null);
+        //     });
+        // });
     });
 
     /**
