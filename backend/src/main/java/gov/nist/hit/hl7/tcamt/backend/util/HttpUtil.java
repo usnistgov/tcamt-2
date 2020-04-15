@@ -3,8 +3,6 @@ package gov.nist.hit.hl7.tcamt.backend.util;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
 
-import gov.nist.hit.hl7.tcamt.backend.util.FileStorageUtil;
-
 public class HttpUtil {
 
     public static String getAppUrl(HttpServletRequest request) {

@@ -1,6 +1,5 @@
 package gov.nist.hit.hl7.tcamt.webapp;
 
-import gov.nist.hit.hl7.tcamt.backend.domain.*;
 import gov.nist.hit.hl7.tcamt.backend.util.*;
 
 import javax.servlet.http.HttpServletRequest;
