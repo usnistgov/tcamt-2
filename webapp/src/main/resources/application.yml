@@ -1,0 +1,34 @@
+spring:
+  data:
+    mongodb:
+      database: tcl
+      port: 27017
+      host: localhost
+
+key: 
+  public: /usr/local/etc/hit/auth/publicKey.txt
+auth:
+  url: http://localhost:8090
+    
+email:
+   port: 25
+   protocol: smtp
+   host: smtp.nist.gov
+   admin: robert.snelick@nist.gov
+   from: tcamt@nist.gov
+   subject: NIST TCAMT Notification
+
+app:
+    date: 03/06/2020
+    version: 2.1.0-beta
+
+admin:
+    email: rsnelick@nist.gov
+
+connect:
+    uploadTokenContext: "#/saveCBTokens"
+    exportEndpoint: api/cb/management/uploadZip
+    loginEndpoint: api/accounts/login
+    apps: "GVT|https://hl7v2.gvt.nist.gov/gvt/;GVT-DEV|https://hit-dev.nist.gov:8099/gvt/;IZ-TOOL-DEV|https://hit-dev.nist.gov:8098/iztool/;HIMSS IIP|https://hl7v2-iz-cdc-testing.nist.gov/iztool/;"
+    createDomainEndpoint: api/domains/new
+    domainsEndpoint: api/domains/findByUser

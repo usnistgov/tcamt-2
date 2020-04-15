@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo
+    container_name: hl7-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb:/data/db
+
+  base:
+    build:
+      context: ./${DIST-ubuntu}/${TAG-latest}/base
+      args:
+        dist: ${DIST-ubuntu}
+        tag: ${TAG-latest}
+    image: ${USER}/${DIST-ubuntu}-${TAG-latest}-hl7-base
+    command: /bin/bash -c "echo 'base' services"
+
+  dev:
+    build:
+      context: ./${DIST-ubuntu}/${TAG-latest}/dev
+      args:
+        dist: ${DIST-ubuntu}
+        tag: ${TAG-latest}
+        username: ${USER}
+    image: ${USER}/${DIST-ubuntu}-${TAG-latest}-hl7-dev
+    depends_on:
+      - mongodb
+      - base
+    environment:
+      - DISPLAY=$DISPLAY
+    # - DISPLAY=docker.for.mac.localhost:0
+    volumes:
+      - home:/home/${USER}
+      - ${HOME}:/mnt
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    # - /etc/localtime:/etc/localtime:ro
+    # - /usr/share/zoneinfo/Europe/Helsinki:/etc/localtime:ro
+    hostname: hl7-dev
+    user: ${USER}
+    entrypoint: /bin/bash -c "/bin/bash -c \"$${@}\""
+    command: |
+        /bin/bash -c "
+            sudo /root/setup.sh
+            /bin/bash || exit 0
+        "
+volumes:
+  mongodb: {}
+  home: {}
