@@ -6,7 +6,7 @@ spring:
       host: localhost
 
 key: 
-  public: /usr/local/etc/hit/auth/publicKey.txt
+  public: /usr/local/etc/hit/tcamt/publicKey.txt
 auth:
   url: http://localhost:8090
     

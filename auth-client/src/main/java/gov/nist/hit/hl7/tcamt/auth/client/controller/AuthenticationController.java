@@ -150,7 +150,7 @@ public class AuthenticationController {
   private String getUrl(HttpServletRequest request, String token) {
     String scheme = request.getScheme();
     String host = request.getHeader("Host");
-    return scheme +"://" + host + "/igamt"  + "/reset-password-confirm/" + token;
+    return scheme +"://" + host + "/tcamt"  + "/reset-password-confirm/" + token;
   }
 
 

@@ -245,7 +245,26 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
                 if (response.status === 401) {
                     //We catch everything but this one. So public users are not bothered
                     //with a login windows when browsing home.
-                    if (response.config.url !== 'api/accounts/cuser') {
+                    if (response.config.url !== 'api/authentication') {
+                        //We don't intercept this request
+                        if (response.config.url !== 'api/accounts/login') {
+                            var deferred = $q.defer(),
+                                req = {
+                                    config: response.config,
+                                    deferred: deferred
+                                };
+                            $rootScope.requests401.push(req);
+                        }
+                        $rootScope.$broadcast('event:loginRequired');
+//                        return deferred.promise;
+
+                        return  $q.when(response);
+                    }
+                }
+                else if (response.status === 400) {
+                    //We catch everything but this one. So public users are not bothered
+                    //with a login windows when browsing home.
+                    if (response.config.url !== 'api/authentication') {
                         //We don't intercept this request
                         if (response.config.url !== 'api/accounts/login') {
                             var deferred = $q.defer(),
@@ -401,24 +420,8 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
      * On 'event:loginConfirmed', resend all the 401 requests.
      */
     $rootScope.$on('event:loginConfirmed', function () {
-        var i,
-            requests = $rootScope.requests401,
-            retry = function (req) {
-                $http(req.config).then(function (response) {
-                    req.deferred.resolve(response);
-                });
-            };
-
-        for (i = 0; i < requests.length; i += 1) {
-            retry(requests[i]);
-        }
-        $rootScope.requests401 = [];
         $location.url('/home');
-
-
         $rootScope.loadProfiles();
-
-
     });
 
     /*jshint sub: true */
@@ -426,16 +429,16 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
      * On 'event:loginRequest' send credentials to the server.
      */
     $rootScope.$on('event:loginRequest', function (event, username, password) {
-        httpHeaders.common['Accept'] = 'application/json';
-        httpHeaders.common['Authorization'] = 'Basic ' + base64.encode(username + ':' + password);
-
-        $http.get('api/accounts/login').success(function () {
-            //If we are here in this callback, login was successfull
-            //Let's get user info now
+        var loginObj = {username: username, password: password};
+        $http.post('api/login', loginObj).then(function (response) {
             httpHeaders.common['Authorization'] = null;
-            $http.get('api/accounts/cuser').then(function (result) {
+            console.log(response);
+            $http.get('api/authentication').then(function (result) {
+                console.log(result);
                 if (result.data && result.data != null) {
                     var rs = angular.fromJson(result.data);
+                    rs.fullName = username;
+                    rs.accountId = 10;
                     userInfoService.setCurrentUser(rs);
                     $rootScope.$broadcast('event:loginConfirmed');
                 } else {
@@ -453,7 +456,7 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
     $rootScope.$on('event:logoutRequest', function () {
         httpHeaders.common['Authorization'] = null;
         userInfoService.setCurrentUser(null);
-        $http.get('j_spring_security_logout');
+        $http.get('api/logout');
     });
 
     /**
