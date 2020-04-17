@@ -7,7 +7,7 @@ WORKDIR /root
 ARG USER=usnistgov
 
 ARG REPO=tcamt-2
-ARG BRANCH=docker
+ARG BRANCH=sso
 RUN	git clone https://github.com/$USER/$REPO
 ADD https://api.github.com/repos/$USER/$REPO/git/refs/heads/$BRANCH /root/tcamt-ver.json
 
