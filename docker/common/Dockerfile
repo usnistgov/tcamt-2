@@ -1,6 +1,5 @@
-ARG dist=ubuntu
-ARG tag=latest
-FROM ${dist}:${tag}
+ARG username=acetcom
+FROM mongo
 
 MAINTAINER Sukchan Lee <acetcom@gmail.com>
 
@@ -9,6 +8,7 @@ RUN apt update && \
     apt install -y --no-install-recommends \
         software-properties-common \
         wget \
+        curl \
         gnupg \
         git \
         iproute2 \
@@ -16,6 +16,11 @@ RUN apt update && \
         netbase \
         pkg-config && \
     apt clean
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+RUN apt install -y --no-install-recommends \
+        nodejs ruby-full ruby-compass && \
+    apt clean
+RUN npm install -g bower grunt-cli
 RUN wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add - && \
     add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
 RUN apt install -y --no-install-recommends \

@@ -9,36 +9,55 @@ services:
     volumes:
       - mongodb:/data/db
 
-  base:
+  common:
     build:
-      context: ./${DIST-ubuntu}/${TAG-latest}/base
+      context: ./common
       args:
-        dist: ${DIST-ubuntu}
-        tag: ${TAG-latest}
-    image: ${USER}/${DIST-ubuntu}-${TAG-latest}-hl7-base
-    command: /bin/bash -c "echo 'base' services"
-
-  dev:
-    build:
-      context: ./${DIST-ubuntu}/${TAG-latest}/dev
-      args:
-        dist: ${DIST-ubuntu}
-        tag: ${TAG-latest}
         username: ${USER}
-    image: ${USER}/${DIST-ubuntu}-${TAG-latest}-hl7-dev
+    image: ${USER}/hl7-common
     depends_on:
       - mongodb
-      - base
-    environment:
-      - DISPLAY=$DISPLAY
-    # - DISPLAY=docker.for.mac.localhost:0
+    command: /bin/bash -c "echo 'common' services"
+
+  auth:
+    build:
+      context: ./auth
+      args:
+        username: ${USER}
+    image: ${USER}/hl7-auth
+    ports:
+      - "8090:8090"
+    depends_on:
+      - common
+    working_dir: /root/hl7-auth/auth
+    command: mvn spring-boot:run -Dspring-boot.run.arguments=--db.host=mongodb
+
+  tcamt:
+    build:
+      context: ./tcamt
+      args:
+        username: ${USER}
+    image: ${USER}/hl7-tcamt
+    depends_on:
+      - auth
+    working_dir: /root/tcamt-2/webapp
+    command: |
+        /bin/bash -c "
+            mvn test -Dspring.data.mongodb.host=mongodb
+            mvn spring-boot:run -Dspring-boot.run.arguments=\"--spring.data.mongodb.host=mongodb --auth.url=http://auth:8090\" || exit 0
+        "
+  dev:
+    build:
+      context: ./dev
+      args:
+        username: ${USER}
+    image: ${USER}/hl7-dev
+    network_mode: "host"
+    depends_on:
+      - auth
     volumes:
       - home:/home/${USER}
       - ${HOME}:/mnt
-      - /tmp/.X11-unix:/tmp/.X11-unix
-    # - /etc/localtime:/etc/localtime:ro
-    # - /usr/share/zoneinfo/Europe/Helsinki:/etc/localtime:ro
-    hostname: hl7-dev
     user: ${USER}
     entrypoint: /bin/bash -c "/bin/bash -c \"$${@}\""
     command: |

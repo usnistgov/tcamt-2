@@ -1,7 +1,5 @@
-ARG dist=ubuntu
-ARG tag=latest
 ARG username=acetcom
-FROM ${username}/${dist}-${tag}-hl7-base
+FROM ${username}/hl7-auth
 
 MAINTAINER Sukchan Lee <acetcom@gmail.com>
 
@@ -12,6 +10,7 @@ RUN apt-get update && \
         manpages-dev \
         cscope \
         vim \
+        gcc \
         sudo \
         iputils-ping \
         net-tools && \
@@ -25,3 +24,5 @@ RUN useradd -m --uid=1000 ${username} && \
     chmod 0440 /etc/sudoers.d/${username}
 
 WORKDIR /home/${username}
+
+EXPOSE 8080 4200 8090
