@@ -52,7 +52,6 @@ services:
       args:
         username: ${USER}
     image: ${USER}/hl7-dev
-    network_mode: "host"
     depends_on:
       - auth
     volumes:
