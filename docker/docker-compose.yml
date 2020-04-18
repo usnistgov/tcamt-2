@@ -38,6 +38,8 @@ services:
       args:
         username: ${USER}
     image: ${USER}/hl7-tcamt
+    ports:
+      - "8080:8080"
     depends_on:
       - auth
     working_dir: /root/tcamt-2/webapp
