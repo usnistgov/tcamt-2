@@ -17,23 +17,28 @@ package gov.nist.healthcare.tools.hl7.v2.tcamt.lite.domain;
  */
 public class TriggerPath {
 
-  private String positionPath;
-  private String namePath;
+	private String positionPath;
+	private String namePath;
 
-  public String getPositionPath() {
-    return positionPath;
-  }
+	public String getPositionPath() {
+		return positionPath;
+	}
 
-  public void setPositionPath(String positionPath) {
-    this.positionPath = positionPath;
-  }
+	public void setPositionPath(String positionPath) {
+		this.positionPath = positionPath;
+	}
 
-  public String getNamePath() {
-    return namePath;
-  }
+	public String getNamePath() {
+		return namePath;
+	}
 
-  public void setNamePath(String namePath) {
-    this.namePath = namePath;
-  }
+	public void setNamePath(String namePath) {
+		this.namePath = namePath;
+	}
+
+	@Override
+	public String toString() {
+		return "TriggerPath [positionPath=" + positionPath + ", namePath=" + namePath + "]";
+	}
 
 }

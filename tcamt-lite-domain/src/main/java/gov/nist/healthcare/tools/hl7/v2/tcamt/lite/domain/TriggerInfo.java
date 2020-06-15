@@ -20,33 +20,37 @@ import java.util.List;
  */
 public class TriggerInfo {
 
-  private String description;
-  private Operation operation;
-  private List<TriggerPath> list = new ArrayList<TriggerPath>();
+	private String description;
+	private Operation operation;
+	private List<TriggerPath> list = new ArrayList<TriggerPath>();
 
-  public String getDescription() {
-    return description;
-  }
+	public String getDescription() {
+		return description;
+	}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-  public Operation getOperation() {
-    return operation;
-  }
+	public Operation getOperation() {
+		return operation;
+	}
 
-  public void setOperation(Operation operation) {
-    this.operation = operation;
-  }
+	public void setOperation(Operation operation) {
+		this.operation = operation;
+	}
 
-  public List<TriggerPath> getList() {
-    return list;
-  }
+	public List<TriggerPath> getList() {
+		return list;
+	}
 
-  public void setList(List<TriggerPath> list) {
-    this.list = list;
-  }
+	public void setList(List<TriggerPath> list) {
+		this.list = list;
+	}
 
+	@Override
+	public String toString() {
+		return "TriggerInfo [description=" + description + ", operation=" + operation + ", list=" + list + "]";
+	}
 
 }

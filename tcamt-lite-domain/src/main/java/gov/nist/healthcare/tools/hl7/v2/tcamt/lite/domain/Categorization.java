@@ -35,4 +35,11 @@ public class Categorization {
 	public void setListData(List<String> listData) {
 		this.listData = listData;
 	}
+	@Override
+	public String toString() {
+		return "Categorization [iPath=" + iPath + ", name=" + name + ", listData=" + listData
+				+ ", testDataCategorization=" + testDataCategorization + "]";
+	}
+	
+	
 }
