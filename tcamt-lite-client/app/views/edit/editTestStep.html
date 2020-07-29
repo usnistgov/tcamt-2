@@ -304,6 +304,38 @@ body {
 												</div>
 											</div>
 
+											<div class="row" ng-if="retrieveTriggers && retrieveTriggers.length > 0">
+												<div class="col-md-2">
+													<label class="control-label">Trigger Info:</label>
+												</div>
+												<div class="col-md-10">
+													<div class="table-responsive">
+														<table class="table table-bordered table-condensed profile-table">
+															<thead>
+															<tr class="tbl-header">
+																<th class="col-md-3">OrderIndifferent Node</th>
+																<th class="col-md-6">Trigger Conditions</th>
+																<th class="col-md-3">Global/Local</th>
+															</tr>
+															</thead>
+															<tbody>
+															<tr ng-repeat="orderIndifferentInfo in retrieveTriggers">
+																<td>{{orderIndifferentInfo.currentIPath}}</td>
+																<td>
+																	<div ng-if="orderIndifferentInfo && orderIndifferentInfo.triggerInfo && orderIndifferentInfo.triggerInfo.list" ng-repeat="triggerInfo in orderIndifferentInfo.triggerInfo.list">
+																		<li>{{orderIndifferentInfo.currentIPath}}.{{triggerInfo.namePath}} = {{retrieveValue(orderIndifferentInfo, triggerInfo)}}</li>
+																	</div>
+																</td>
+																<td>
+																	<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-plus-circle fa-fw"></i>Make Local Trigger Condition</span>
+																	<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" ng-click="removeSpecificTriggerCondition(orderIndifferentInfo)" class="label label-field label-icon"><i class="fa fa-times-circle fa-fw"></i>Remove Local Trigger Condition</span>
+																</td>
+															</tr>
+															</tbody>
+														</table>
+													</div>
+												</div>
+											</div>
 											<div class="col-md-12">
 										<div layout="row" layout-align="center center">
 										<div class="btn-group btn-group-sm" data-toggle="buttons">
@@ -315,7 +347,6 @@ body {
 											</label>
    										</div>
 										   </div>
-
 												<div class="table-responsive">
 													<table tt-table tt-params="segmentParams" class="table table-bordered table-condensed profile-table" id="segmentTable">
 														<thead>
@@ -597,6 +628,9 @@ body {
 		<td class="col-md-1">
 			<div ng-show="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && node.orderIndifferentInfo.triggerInfo.description">
 				<span ng-click="openTriggerDialog(node)">{{node.orderIndifferentInfo.triggerInfo.description}} <i class="fa fa-pencil fa-fw"></i></span>
+				<div ng-repeat="e in checkDuplicatedTriggerValue(node, segmentList)">
+					<li style="color: red"><i class="fa fa-check fa-fw"></i>{{::e}}</li>
+				</div>
 			</div>
 			<div ng-show="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && !node.orderIndifferentInfo.triggerInfo.description">
 				<span ng-click="openTriggerDialog(node)"><i class="fa fa-pencil fa-fw"></i> Create Trigger</span>
@@ -623,6 +657,9 @@ body {
 		<td class="col-md-1">
 			<div ng-show="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && node.orderIndifferentInfo.triggerInfo.description">
 				<span ng-click="openTriggerDialog(node)">{{node.orderIndifferentInfo.triggerInfo.description}} <i class="fa fa-pencil fa-fw"></i></span>
+				<div ng-repeat="e in checkDuplicatedTriggerValue(node, segmentList)">
+					<li style="color: red"><i class="fa fa-check fa-fw"></i>{{::e}}</li>
+				</div>
 			</div>
 			<div ng-show="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && !node.orderIndifferentInfo.triggerInfo.description">
 				<span ng-click="openTriggerDialog(node)"><i class="fa fa-pencil fa-fw"></i> Create Trigger</span>
@@ -912,6 +949,56 @@ body {
 		<td class="col-md-1"/>
     </tr>
 </script>
+
+<script type="text/ng-template" id="SpecificTriggerEditModal.html">
+	<div class="modal-header">
+		<h3 class="modal-title">Edit Specific Trigger Conditions</h3>
+	</div>
+	<div class="modal-body">
+		<uib-accordion close-others="false">
+			<uib-accordion-group ng-repeat="seg in relatedSegmentList">
+				<uib-accordion-heading>
+					{{seg.iPath}}
+				</uib-accordion-heading>
+				<div class="col-md-12">
+					<div class="table-responsive">
+						<table class="table table-bordered table-condensed profile-table">
+							<thead>
+							<tr class="tbl-header">
+								<th class="col-md-3">Path</th>
+								<th class="col-md-3">Datatype</th>
+								<th class="col-md-3">Value</th>
+								<th class="col-md-3">Action</th>
+							</tr>
+							</thead>
+							<tbody>
+							<tr ng-if="seg.parsingResult" ng-repeat="item in seg.parsingResult">
+								<td>{{seg.segmentName}}-{{item.path}}</td>
+								<td>
+									{{item.dt}}
+								</td>
+								<td>
+									{{item.value}}
+								</td>
+								<td>
+									<input type="checkbox" ng-model="item.isTrigger">
+								</td>
+							</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</uib-accordion-group>
+		</uib-accordion>
+	</div>
+
+	<div class="modal-footer">
+		<button class="btn btn-default btn-sm" ng-click="cancel()"><span><i class="fa fa-times fa-fw">&nbsp; </i>Cancel</span>
+		</button>
+		<button class="btn btn-info btn-sm" ng-click="saveTrigger()"><span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Save</span>
+		</button>
+	</div>
+</script>
 <script type="text/ng-template" id="TriggerEditModal.html">
 	<div class="modal-header">
 		<h3 class="modal-title">Edit Trigger</h3>
@@ -931,15 +1018,6 @@ body {
 				</thead>
 				<tbody></tbody>
 			</table>
-		</div>
-
-		<div ng-if="selectedNode.orderIndifferentInfo.triggerInfo && selectedNode.orderIndifferentInfo.triggerInfo.list && selectedNode.orderIndifferentInfo.triggerInfo.list.length > 1">
-			<form>
-				<label>You have multiple triggers. Please pick an Operation:</label>
-				<input type="radio" ng-model="selectedNode.orderIndifferentInfo.triggerInfo.operation" ng-click="generateDescription()" value="AND">AND
-				<input type="radio" ng-model="selectedNode.orderIndifferentInfo.triggerInfo.operation" ng-click="generateDescription()" value="OR">OR
-				<input type="radio" ng-model="selectedNode.orderIndifferentInfo.triggerInfo.operation" ng-click="generateDescription()" value="XOR">XOR
-			</form>
 		</div>
 
 		<div ng-if="selectedNode.orderIndifferentInfo.triggerInfo && selectedNode.orderIndifferentInfo.triggerInfo.description">

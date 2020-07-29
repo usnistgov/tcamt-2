@@ -819,12 +819,10 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         if(newOIPattern.selectedSegments.length > 0) {
             var keys = newOIPattern.selectedSegments[0].iPath.split("-");
             for(var i in newOIPattern.selectedSegments){
-                console.log(newOIPattern.selectedSegments[i].iPath);
                 var newKey = "";
                 var path = ""
                 for(var j in keys){
                     path = path + "-" + keys[j];
-                    console.log(path);
 
                     if(newOIPattern.selectedSegments[i].iPath.startsWith(path.substring(1))) {
                         newKey = path.substring(1);
@@ -903,7 +901,6 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 
                     newOIPattern.isOpen = true;
                     $rootScope.orderIndifferentConstraintsPatterns.push(newOIPattern);
-                    console.log($rootScope.orderIndifferentConstraintsPatterns);
                     $scope.testDataAccordi.segmentList = false;
                     $scope.testDataAccordi.selectedSegment = false;
                     $scope.testDataAccordi.constraintList = false;
@@ -1530,6 +1527,8 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
             $rootScope.selectedSegmentNode = angular.fromJson(response.data);
             setTimeout(function () {
                 $scope.refreshTree();
+
+                $scope.retrieveTriggerInfoForSpecificNode($rootScope.selectedSegmentNode, $rootScope.selectedTestStep.orderIndifferentInfoMap);
                 waitingDialog.hide();
             }, 100);
         }, function (error) {
@@ -1676,6 +1675,258 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 
     };
 
+
+    $scope.print = function (something) {
+        console.log(something);
+    };
+
+    $scope.comparePaths = function (positionPath, namePath) {
+
+        const positionPathList = positionPath.split('.');
+        const namePathList = namePath.split('.');
+
+        for(let i=0; i < positionPathList.length; i++) {
+            if(positionPathList[i] === namePathList[i]) return i;
+        }
+
+        return positionPathList.length;
+
+    };
+
+    $scope.retrieveValue = function (orderIndifferentInfo, triggerInfo) {
+        const key = orderIndifferentInfo.currentIPath + '.' + triggerInfo.namePath.split('.').join('[1].')  + '[1]';
+        const testDataCategorization = $rootScope.selectedTestStep.testDataCategorizationMap[$scope.replaceDot2Dash(key)];
+        if (testDataCategorization
+            && testDataCategorization.testDataCategorization
+            && testDataCategorization.testDataCategorization === 'Value-Test Case Fixed List'
+            && testDataCategorization.listData
+            && testDataCategorization.listData.length > 0) {
+            return testDataCategorization.listData.join("|")
+        } else {
+            const seg = $rootScope.segmentList.find(item => key.startsWith(item.iPath));
+            let value = seg.lineStr
+            const position = $scope.comparePaths(triggerInfo.positionPath, triggerInfo.namePath);
+            const fieldPosition = triggerInfo.positionPath.split('.')[position];
+            const componentPosition = triggerInfo.positionPath.split('.')[position + 1];
+            const subComponentPosition = triggerInfo.positionPath.split('.')[position + 2];
+
+            if(fieldPosition) {
+                value = value.split('|')[fieldPosition];
+            }
+            if(componentPosition) {
+                value = value.split('^')[componentPosition-1];
+            }
+            if(subComponentPosition) {
+                value = value.split('&')[subComponentPosition-1];
+            }
+
+            return value;
+        }
+
+        return 'Not found';
+    };
+
+    $scope.retrieveTriggerInfoForSpecificNode = function (selectedSegmentNode, orderIndifferentInfoMap) {
+        $scope.retrieveTriggers = [];
+        if(selectedSegmentNode && selectedSegmentNode.iPositionPath && selectedSegmentNode.postionPath) {
+            const iPathList = selectedSegmentNode.iPath.split('.');
+            const iPositionPathList = selectedSegmentNode.iPositionPath.split('.');
+            const positionPathList = selectedSegmentNode.postionPath.split('.');
+            const pathList = selectedSegmentNode.path.split('.');
+            let currentIPath = '';
+            let currentIPositionPath = '';
+            let currentPositionPath = '';
+            let currentPath = '';
+            for(let i = 0; i < iPositionPathList.length; i++){
+                if(i === 0) {
+                    currentIPath = iPathList[0];
+                    currentIPositionPath = iPositionPathList[0];
+                    currentPositionPath = positionPathList[0];
+                    currentPath = pathList[0];
+                } else {
+                    currentIPath = currentIPath + "." + iPathList[i];
+                    currentIPositionPath = currentIPositionPath + "-" + iPositionPathList[i];
+                    currentPositionPath = currentPositionPath + "-" + positionPathList[i];
+                    currentPath = currentPath + "." + pathList[i];
+                }
+
+                let triggerInfo;
+                let orderIndifferentInfo = orderIndifferentInfoMap[currentIPositionPath];
+                if(orderIndifferentInfo && orderIndifferentInfo.orderSpecific) {
+                    triggerInfo = orderIndifferentInfo.triggerInfo;
+                    triggerInfo.type = 'local';
+                }
+
+                if (!triggerInfo) {
+                    orderIndifferentInfo = orderIndifferentInfoMap[currentPositionPath];
+                }
+                if(orderIndifferentInfo && orderIndifferentInfo.orderSpecific) {
+                    triggerInfo = orderIndifferentInfo.triggerInfo;
+                }
+
+                if(triggerInfo) {
+                    $scope.retrieveTriggers.push({
+                        currentIPath : currentIPath,
+                        currentIPositionPath : currentIPositionPath,
+                        currentPositionPath : currentPositionPath,
+                        currentPath : currentPath,
+                        triggerInfo : triggerInfo,
+                    })
+                }
+            }
+        }
+    };
+
+    $scope.checkDuplicatedTriggerValue = function (orderIndifferentNode, segmentList) {
+        if(orderIndifferentNode){
+            const orderIndifferentNodePositionPath = $scope.replaceAll(orderIndifferentNode.positionPath, "-" , ".");
+            if(orderIndifferentNode.orderIndifferentInfo && orderIndifferentNode.orderIndifferentInfo.triggerInfo && orderIndifferentNode.orderIndifferentInfo.triggerInfo.list){
+                const triggerKeyValuePaths = orderIndifferentNode.orderIndifferentInfo.triggerInfo.list.map(item => {
+                    return orderIndifferentNodePositionPath + '.' + item.positionPath;
+                });
+                const orderIndifferentNodePositionPathSize = orderIndifferentNodePositionPath.split('.').length;
+                const relatedSegmentsList = segmentList.filter(seg => seg.positionPath.startsWith(orderIndifferentNodePositionPath));
+
+                let relatedSegmentsMap = {};
+                for(let i = 0; i < relatedSegmentsList.length; i++){
+
+                    const iPath = relatedSegmentsList[i].iPath;
+                    let key = '';
+                    for(let j = 0; j < orderIndifferentNodePositionPathSize - 1; j++){
+                        key = key + '.' + iPath.split('.')[j];
+                    }
+                    if (key === '') key = 'root';
+                    else key = key.substring(1);
+                    if (!relatedSegmentsMap[key]) relatedSegmentsMap[key] = [];
+
+                    relatedSegmentsMap[key].push(relatedSegmentsList[i]);
+                }
+
+                const keys = Object.keys(relatedSegmentsMap);
+                const finalCheckSum = [];
+                for (const key of keys) {
+                    const segList = relatedSegmentsMap[key];
+                    const result = triggerKeyValuePaths.map(triggerKeyValuePath => {
+                        return segList
+                            .filter(seg => triggerKeyValuePath.startsWith(seg.positionPath))
+                            .map(filteredSeg => {
+                                const valuePathInSeg = triggerKeyValuePath.substring(filteredSeg.positionPath.length + 1);
+                                let value = filteredSeg.lineStr;
+                                const fieldPosition = valuePathInSeg.split('.')[0];
+                                const componentPosition = valuePathInSeg.split('.')[1];
+                                const subComponentPosition = valuePathInSeg.split('.')[2];
+
+                                if(fieldPosition) {
+                                    value = value.split('|')[fieldPosition];
+                                }
+                                if(componentPosition) {
+                                    value = value.split('^')[componentPosition-1];
+                                }
+                                if(subComponentPosition) {
+                                    value = value.split('&')[subComponentPosition-1];
+                                }
+                                return { positionIPath : filteredSeg.positionIPath, iPath: filteredSeg.iPath ,value : value };
+                            });
+                    });
+                    if(result && result.length > 0) {
+                        const found = [];
+                        for(const o of result[0]) {
+                            const valuePositionIPath = o.positionIPath.split('.');
+                            const valueIPath = o.iPath.split('.');
+
+                            let key = '';
+                            let iPath = '';
+                            for(let i = 0; i < orderIndifferentNodePositionPathSize; i++){
+                                key = key + '.' + valuePositionIPath[i];
+                                iPath = iPath + '.' + valueIPath[i];
+                            }
+                            key = key.substring(1);
+                            iPath = iPath.substring(1);
+                            const values = [];
+                            for(const item of result) {
+                                const foundItem = item.find(value => value.positionIPath.startsWith(key));
+                                if(foundItem) values.push(item.find(value => value.positionIPath.startsWith(key)).value);
+                            }
+
+                            found.push({key:key, iPath: iPath, values:values});
+                        }
+                        if(found) {
+                            const checkMap = {};
+
+                            found.forEach(v => {
+                                const key = v.values.join();
+                                if (!checkMap[key]) checkMap[key] = [];
+                                checkMap[key].push(v.iPath);
+                            });
+                            finalCheckSum.push(checkMap);
+
+                        }
+                    }
+                }
+                if(finalCheckSum) {
+                    let resultDescription = [];
+                    finalCheckSum.forEach(check => {
+                        const keys = Object.keys(check);
+                        for(const key of keys) {
+                            if(!key || key === '') {
+
+                            }if(check[key].length > 1) {
+                                resultDescription.push('Duplicated trigger condition found:{' + check[key].join(' , ') + '}');
+                            }
+                        }
+                    });
+                    return resultDescription;
+                }
+            }
+        }
+        return ['Check Failed'];
+    };
+
+    $scope.removeSpecificTriggerCondition = function (orderIndifferentInfo) {
+        $rootScope.selectedTestStep.orderIndifferentInfoMap[orderIndifferentInfo.currentIPositionPath] = null;
+        $scope.retrieveTriggerInfoForSpecificNode($rootScope.selectedSegmentNode, $rootScope.selectedTestStep.orderIndifferentInfoMap);
+    };
+
+    $scope.openSpecificTriggerDialog = function (orderIndifferentInfo) {
+        var constraintParams = {};
+        constraintParams.integrationProfileId = $rootScope.selectedTestStep.integrationProfileId;
+        constraintParams.conformanceProfileId = $rootScope.selectedTestStep.conformanceProfileId;
+        constraintParams.er7Message = $rootScope.selectedTestStep.er7Message;
+        constraintParams.testDataCategorizationMap = $rootScope.selectedTestStep.testDataCategorizationMap;
+        $http.post('api/teststep/getProfileData', constraintParams).then(function (response) {
+            $scope.profileData = angular.fromJson(response.data);
+            $scope.conformanceProfile = _.find($scope.profileData.integrationProfile.conformanceProfiles, function(cp){
+                return cp.conformanceProfileMetaData.id == $rootScope.selectedTestStep.conformanceProfileId;
+            });
+
+            var modalInstance = $modal.open({
+                templateUrl: 'SpecificTriggerEditModal.html',
+                controller: 'SpecificTriggerEditModalCtrl',
+                size: 'lg',
+                windowClass: 'my-modal-popup',
+                resolve: {
+                    orderIndifferentInfo: function () {
+                        return orderIndifferentInfo;
+                    },
+                    profileData: function () {
+                        return $scope.profileData;
+                    },
+                    conformanceProfile: function () {
+                        return $scope.conformanceProfile;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function() {
+                $scope.retrieveTriggerInfoForSpecificNode($rootScope.selectedSegmentNode, $rootScope.selectedTestStep.orderIndifferentInfoMap);
+                $scope.recordChanged();
+            });
+
+        }, function (error) {
+        });
+
+
+    };
 
     $scope.openTriggerDialog  = function (node) {
         var modalInstance = $modal.open({
@@ -3311,6 +3562,146 @@ angular.module('tcl').controller('OpenApplyMessageTemplate', function($scope, $m
     };
 });
 
+angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope, $http, $rootScope, profileData, conformanceProfile, $modalInstance, orderIndifferentInfo) {
+    $scope.orderIndifferentInfo = orderIndifferentInfo;
+    $scope.relatedSegmentList = $rootScope.segmentList.filter(seg => seg.iPath.startsWith($scope.orderIndifferentInfo.currentIPath));
+    $scope.profileData = profileData;
+    $scope.conformanceProfile = conformanceProfile;
+
+    $scope.retriveDatatypeByComponent = function (datatypeId) {
+        const dt = _.find($scope.profileData.integrationProfile.datatypes, function(d){
+            return d.id == datatypeId;
+        });
+        return dt;
+    };
+
+    $scope.retriveDatatypeByField = function (segmentId, i, dmKeyValue) {
+
+        const seg = _.find($scope.profileData.integrationProfile.segments, function(seg){
+            return seg.id == segmentId;
+        });
+
+        if(seg) {
+            if(dmKeyValue) {
+              if(seg.dynamicMapping && seg.dynamicMapping.items) {
+                  const found = seg.dynamicMapping.items.find(item => {
+                      return item.value === dmKeyValue;
+                  });
+                  if(found && found.datatypeId) {
+                      const dt = _.find($scope.profileData.integrationProfile.datatypes, function(d){
+                          return d.id == found.datatypeId;
+                      });
+                      return dt;
+                  }
+              }
+            } else {
+                const dt = _.find($scope.profileData.integrationProfile.datatypes, function(d){
+                    return d.id == seg.children[i-1].datatypeId;
+                });
+                return dt;
+            }
+        }
+        return null;
+    };
+
+    $scope.relatedSegmentList.forEach(seg => {
+        seg.parsingResult = [];
+        const segmentId = seg.segmentDef.id;
+        const fieldList = seg.lineStr.split('|');
+
+        for (let i = 1; i < fieldList.length; i++){
+            const fValue = fieldList[i];
+            if (fValue && fValue !== '') {
+                let fDT = null;
+                if(seg.segmentName === 'OBX' && i === 5) {
+                    fDT = $scope.retriveDatatypeByField(segmentId, 5, fieldList[2]);
+                } else {
+                    fDT = $scope.retriveDatatypeByField(segmentId, i, null);
+                }
+                if(fDT) {
+                    if(!fDT.children) {
+                        seg.parsingResult.push(
+                            {
+                                path : i,
+                                value : fValue,
+                                dt : fDT.name,
+                            }
+                        );
+                    } else {
+                        const componentList = fValue.split('^');
+                        for (let j = 0; j < componentList.length; j++){
+                            const cValue = componentList[j];
+                            if (cValue && cValue !== '') {
+                                const cDT = $scope.retriveDatatypeByComponent(fDT.children[j].datatypeId);
+                                if(cDT) {
+                                    if(!cDT.children) {
+                                        seg.parsingResult.push(
+                                            {
+                                                path : i + '.' + (j + 1),
+                                                value : cValue,
+                                                dt : cDT.name,
+                                            }
+                                        );
+                                    } else {
+                                        const subComponentList = cValue.split('&');
+                                        for (let k = 0; k < subComponentList.length; k++){
+                                            const scValue = subComponentList[k];
+                                            if (scValue && scValue !== '') {
+                                                const scDT = $scope.retriveDatatypeByComponent(cDT.children[k].datatypeId);
+                                                if(scDT) {
+                                                    seg.parsingResult.push(
+                                                        {
+                                                            path : i + '.' + (j + 1) + '.' + (k + 1),
+                                                            value : scValue,
+                                                            dt : scDT.name,
+                                                        }
+                                                    );
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    });
+
+    $scope.cancel = function() {
+        $modalInstance.dismiss('cancel');
+    };
+
+    $scope.saveTrigger = function() {
+        $rootScope.selectedTestStep.orderIndifferentInfoMap[$scope.orderIndifferentInfo.currentIPositionPath] = {
+            orderSpecific : true,
+            triggerInfo : {
+                description : "This is Specific!",
+                list : [],
+                operation : "AND",
+            }
+        }
+
+        $scope.relatedSegmentList.forEach(seg => {
+            if(seg.parsingResult) {
+                for(const item of seg.parsingResult) {
+                    if(item.isTrigger) {
+                        $rootScope.selectedTestStep.orderIndifferentInfoMap[$scope.orderIndifferentInfo.currentIPositionPath].triggerInfo.list.push(
+                            {
+                                namePath: (seg.path + '.' + item.path).substring($scope.orderIndifferentInfo.currentPath.length + 1),
+                                positionPath : (seg.positionPath + '.' + item.path).substring($scope.orderIndifferentInfo.currentPositionPath.length + 1),
+                            },
+                        )
+                    }
+                }
+            }
+        });
+        $modalInstance.close();
+    };
+});
+
 angular.module('tcl').controller('TriggerEditModalCtrl', function($scope, $rootScope, $modalInstance, node, profileData, conformanceProfile, ngTreetableParams) {
     $scope.selectedNode = node;
     $scope.profileData = profileData;
@@ -3457,7 +3848,7 @@ angular.module('tcl').controller('TriggerEditModalCtrl', function($scope, $rootS
                 namePath : namePath
             }
         );
-
+        $scope.selectedNode.orderIndifferentInfo.triggerInfo.operation = 'AND';
         $scope.generateDescription();
     };
 
@@ -3475,14 +3866,12 @@ angular.module('tcl').controller('TriggerEditModalCtrl', function($scope, $rootS
 
                     for(var i in $scope.selectedNode.orderIndifferentInfo.triggerInfo.list) {
                         if(i == 0) {
-                            console.log(i);
                             if($scope.selectedNode.type === 'segment'){
                                 result = "[The value of " + this.getSegmentByRef($scope.selectedNode.ref).name + '-' + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
                             }else if($scope.selectedNode.type === 'group'){
                                 result =  "[The value of " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
                             }
                         }else {
-                            console.log(i);
                             if($scope.selectedNode.type === 'segment'){
                                 result = result + " " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.operation + " [The value of " + this.getSegmentByRef($scope.selectedNode.ref).name + '-' + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
                             }else if($scope.selectedNode.type === 'group'){

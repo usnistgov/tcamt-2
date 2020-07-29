@@ -987,7 +987,13 @@ public class GenerationUtil {
 				String profileCurrentPath = positionPath.substring(0, positionPath.indexOf("["));
 				profilePath = profilePath + "-" + profileCurrentPath;
 
-				OrderIndifferentInfo orderIndifferentInfo = orderIndifferentInfoMap.get(profilePath.substring(1));
+				OrderIndifferentInfo orderIndifferentInfo = orderIndifferentInfoMap.get(this.replaceDot2Dash(instancePath.substring(1)));
+				if(orderIndifferentInfo == null) orderIndifferentInfo = orderIndifferentInfoMap.get(profilePath.substring(1));
+				
+				System.out.println("---------------------");
+				System.out.println(instancePath.substring(1));
+				System.out.println(profilePath.substring(1));
+				System.out.println(orderIndifferentInfo);
 
 				if (orderIndifferentInfo != null) {
 					if (orderIndifferentInfo.isOrderSpecific()) {
@@ -1003,6 +1009,7 @@ public class GenerationUtil {
 				}
 			}
 		}
+		
 		if (currentElm.getNodeName().equals("OrderIndifferent"))
 			return null;
 		else
