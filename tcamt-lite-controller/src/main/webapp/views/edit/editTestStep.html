@@ -317,6 +317,9 @@
 																	<div ng-if="orderIndifferentInfo && orderIndifferentInfo.triggerInfo && orderIndifferentInfo.triggerInfo.list" ng-repeat="triggerInfo in orderIndifferentInfo.triggerInfo.list">
 																		<li>{{orderIndifferentInfo.currentIPath}}.{{triggerInfo.namePath}} = {{retrieveValue(orderIndifferentInfo, triggerInfo)}}</li>
 																	</div>
+																	<div>
+																		<span ng-repeat="error in checkTriggerError(orderIndifferentInfo)" style="color: red"><i class="fa fa-check fa-fw"></i>{{error}}</span>
+																	</div>
 																</td>
 																<td>
 																	<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-plus-circle fa-fw"></i>Make Local Trigger Condition</span>
@@ -615,7 +618,7 @@
 			</div>
 		</td>
 		<td class="col-md-1">
-			<div ng-show="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && node.orderIndifferentInfo.triggerInfo.description">
+			<div ng-if="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && node.orderIndifferentInfo.triggerInfo.description">
 				<span ng-click="openTriggerDialog(node)">{{node.orderIndifferentInfo.triggerInfo.description}} <i class="fa fa-pencil fa-fw"></i></span>
 				<div ng-repeat="e in checkDuplicatedTriggerValue(node, segmentList)">
 					<li style="color: red"><i class="fa fa-check fa-fw"></i>{{::e}}</li>

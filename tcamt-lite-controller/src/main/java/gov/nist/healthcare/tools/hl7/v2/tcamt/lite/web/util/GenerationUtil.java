@@ -1365,7 +1365,7 @@ public class GenerationUtil {
 					constraintXMLOutPut.getCategorizationsDataMap().put(this.replaceDot2Dash(segmentiPath + fieldiPath), fieldStr);
 					constraintXMLOutPut.getCategorizationsUsageMap().put(this.replaceDot2Dash(segmentiPath + fieldiPath), fieldUsagePath);
 					
-					if (foiInfo != null && foiInfo.isOrderSpecific() && field.getMax() != null && !field.getMax().equals("0") && !field.getMax().equals("1")) {
+					if (foiInfo != null && !foiInfo.isOrderSpecific() && field.getMax() != null && !field.getMax().equals("0") && !field.getMax().equals("1")) {
 						if (cateOfField != null) {
 							if (cateOfField.getTestDataCategorization().equals("Indifferent")) {
 							} else if (cateOfField.getTestDataCategorization().equals("NonPresence")) {
@@ -1394,7 +1394,7 @@ public class GenerationUtil {
 					}
 				} else {
 					FieldOrderIndifferentInfo foiInfo = params.getFieldOrderIndifferentInfoMap().get(this.replaceDot2Dash(segmentiPath + fieldiPath));
-					if (foiInfo != null && foiInfo.isOrderSpecific() && field.getMax() != null && !field.getMax().equals("0") && !field.getMax().equals("1")) {
+					if (foiInfo != null && !foiInfo.isOrderSpecific() && field.getMax() != null && !field.getMax().equals("0") && !field.getMax().equals("1")) {
 						NodeList contextsNL = ((Element)holderElm.getParentNode()).getElementsByTagName("Contexts");
 		        		Element contextsElm;
 		        		if(contextsNL == null || contextsNL.getLength() == 0) {
@@ -1589,7 +1589,7 @@ public class GenerationUtil {
 					constraintXMLOutPut.getCategorizationsDataMap().put(this.replaceDot2Dash(segmentiPath + fieldiPath), fieldStr);
 					constraintXMLOutPut.getCategorizationsUsageMap().put(this.replaceDot2Dash(segmentiPath + fieldiPath), fieldUsagePath);
 
-					if (foiInfo != null && foiInfo.isOrderSpecific() && field.getMax() != null && !field.getMax().equals("0") && !field.getMax().equals("1")) {
+					if (foiInfo != null && !foiInfo.isOrderSpecific() && field.getMax() != null && !field.getMax().equals("0") && !field.getMax().equals("1")) {
 						if (cateOfField != null) {
 							if (cateOfField.getTestDataCategorization().equals("Indifferent")) {
 							} else if (cateOfField.getTestDataCategorization().equals("NonPresence")) {
@@ -1618,7 +1618,7 @@ public class GenerationUtil {
 					}
 				} else {
 					FieldOrderIndifferentInfo foiInfo = params.getFieldOrderIndifferentInfoMap().get(this.replaceDot2Dash(segmentiPath + fieldiPath));
-					if (foiInfo != null && foiInfo.isOrderSpecific() && field.getMax() != null && !field.getMax().equals("0") && !field.getMax().equals("1")) {
+					if (foiInfo != null && !foiInfo.isOrderSpecific() && field.getMax() != null && !field.getMax().equals("0") && !field.getMax().equals("1")) {
 		        		NodeList orderIndifferents = xmlDoc.getElementsByTagName("OrderIndifferent");
 		        		Element orderIndifferentElm;
 		        		if(orderIndifferents == null || orderIndifferents.getLength() == 0) {

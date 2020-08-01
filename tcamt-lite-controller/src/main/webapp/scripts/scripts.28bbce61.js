@@ -8289,13 +8289,74 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         }
     };
 
+    $scope.checkTriggerError = function (orderIndifferentInfo) {
+        if(orderIndifferentInfo){
+            const orderIndifferentNodePositionPath = $scope.replaceAll(orderIndifferentInfo.currentPositionPath, "-" , ".");
+            let iPath = $scope.replaceAll(orderIndifferentInfo.currentIPositionPath, "-" , ".");
+            let iPathModifed = iPath.substring(0, iPath.lastIndexOf('['));
+            const relatedSegmentsList = $rootScope.segmentList.filter(seg => seg.positionIPath.startsWith(iPathModifed));
+            let triggerKeyValuePaths = orderIndifferentInfo.triggerInfo.list.map(item => {
+                return orderIndifferentNodePositionPath + '.' + item.positionPath;
+            });
+            let target = [];
+            let targetKey = '';
+            let resultOfCompare = {};
+            relatedSegmentsList.forEach(seg => {
+                let key = '';
+                const size = orderIndifferentInfo.currentPositionPath.split('-').length;
+
+                for(let i=0; i < size; i++) {
+                    key = key + '-' + seg.iPath.split('.')[i];
+                }
+                key = key.substring(1);
+
+                triggerKeyValuePaths = triggerKeyValuePaths.sort();
+                triggerKeyValuePaths.forEach(triggerKeyValuePath => {
+                    if(triggerKeyValuePath.startsWith(seg.positionPath)) {
+                        const valuePathInSeg = triggerKeyValuePath.substring(seg.positionPath.length + 1);
+                        let value = seg.lineStr;
+                        const fieldPosition = valuePathInSeg.split('.')[0];
+                        const componentPosition = valuePathInSeg.split('.')[1];
+                        const subComponentPosition = valuePathInSeg.split('.')[2];
+
+                        if(fieldPosition) {
+                            value = value.split('|')[fieldPosition];
+                        }
+                        if(componentPosition) {
+                            value = value.split('^')[componentPosition-1];
+                        }
+                        if(subComponentPosition) {
+                            value = value.split('&')[subComponentPosition-1];
+                        }
+
+                        if(seg.positionIPath.startsWith(iPath)) {
+                            target.push(`${seg.segmentName}-${valuePathInSeg} = ${value}`);
+                            targetKey = key;
+                        }else{
+                            if (!resultOfCompare[key]) resultOfCompare[key] = [];
+                            resultOfCompare[key].push(`${seg.segmentName}-${valuePathInSeg} = ${value}`);
+                        }
+                    }
+                });
+            });
+            let errorList = [];
+            const resultKeys = Object.keys(resultOfCompare);
+            for (const resultKey of resultKeys) {
+                if(resultOfCompare[resultKey].join(' , ') === target.join(' , ')) {
+                    errorList.push(resultKey);
+
+                }
+            }
+            if(errorList.length > 0) return [`This trigger condition is duplicated with ${errorList.join(' , ')}`];
+        }
+        return [];
+    }
+
     $scope.checkDuplicatedTriggerValue = function (orderIndifferentNode, segmentList) {
         if(orderIndifferentNode){
             const orderIndifferentNodePositionPath = $scope.replaceAll(orderIndifferentNode.positionPath, "-" , ".");
             if(orderIndifferentNode.orderIndifferentInfo && orderIndifferentNode.orderIndifferentInfo.triggerInfo && orderIndifferentNode.orderIndifferentInfo.triggerInfo.list){
-                const triggerKeyValuePaths = orderIndifferentNode.orderIndifferentInfo.triggerInfo.list.map(item => {
-                    return orderIndifferentNodePositionPath + '.' + item.positionPath;
-                });
+                let errorList = [];
                 const orderIndifferentNodePositionPathSize = orderIndifferentNodePositionPath.split('.').length;
                 const relatedSegmentsList = segmentList.filter(seg => seg.positionPath.startsWith(orderIndifferentNodePositionPath));
 
@@ -8315,15 +8376,36 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
                 }
 
                 const keys = Object.keys(relatedSegmentsMap);
-                const finalCheckSum = [];
                 for (const key of keys) {
+                    let result = {};
                     const segList = relatedSegmentsMap[key];
-                    const result = triggerKeyValuePaths.map(triggerKeyValuePath => {
-                        return segList
-                            .filter(seg => triggerKeyValuePath.startsWith(seg.positionPath))
-                            .map(filteredSeg => {
-                                const valuePathInSeg = triggerKeyValuePath.substring(filteredSeg.positionPath.length + 1);
-                                let value = filteredSeg.lineStr;
+                    segList.forEach(seg => {
+                        let positionIPath = '';
+                        let iPath = '';
+                        const size = orderIndifferentNode.positionPath.split('-').length;
+
+                        for(let i=0; i < size; i++) {
+                            positionIPath = positionIPath + '-' + seg.positionIPath.split('.')[i];
+                            iPath = iPath + '.' + seg.iPath.split('.')[i];
+                        }
+                        positionIPath = positionIPath.substring(1);
+                        iPath = iPath.substring(1);
+
+                        let orderIndifferentInfo = $rootScope.selectedTestStep.orderIndifferentInfoMap[positionIPath];
+
+                        if(!orderIndifferentInfo) {
+                            orderIndifferentInfo = orderIndifferentNode.orderIndifferentInfo;
+                        }
+
+                        let triggerKeyValuePaths = orderIndifferentInfo.triggerInfo.list.map(item => {
+                            return orderIndifferentNodePositionPath + '.' + item.positionPath;
+                        });
+
+                        triggerKeyValuePaths = triggerKeyValuePaths.sort();
+                        triggerKeyValuePaths.forEach(triggerKeyValuePath => {
+                            if(triggerKeyValuePath.startsWith(seg.positionPath)) {
+                                const valuePathInSeg = triggerKeyValuePath.substring(seg.positionPath.length + 1);
+                                let value = seg.lineStr;
                                 const fieldPosition = valuePathInSeg.split('.')[0];
                                 const componentPosition = valuePathInSeg.split('.')[1];
                                 const subComponentPosition = valuePathInSeg.split('.')[2];
@@ -8337,58 +8419,29 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
                                 if(subComponentPosition) {
                                     value = value.split('&')[subComponentPosition-1];
                                 }
-                                return { positionIPath : filteredSeg.positionIPath, iPath: filteredSeg.iPath ,value : value };
-                            });
+                                if(!result[iPath]) result[iPath] = [];
+                                result[iPath].push(`${seg.segmentName}-${valuePathInSeg} = ${value}`);
+                            }
+                        });
                     });
-                    if(result && result.length > 0) {
-                        const found = [];
-                        for(const o of result[0]) {
-                            const valuePositionIPath = o.positionIPath.split('.');
-                            const valueIPath = o.iPath.split('.');
+                    let upsideDownResult = {};
 
-                            let key = '';
-                            let iPath = '';
-                            for(let i = 0; i < orderIndifferentNodePositionPathSize; i++){
-                                key = key + '.' + valuePositionIPath[i];
-                                iPath = iPath + '.' + valueIPath[i];
-                            }
-                            key = key.substring(1);
-                            iPath = iPath.substring(1);
-                            const values = [];
-                            for(const item of result) {
-                                const foundItem = item.find(value => value.positionIPath.startsWith(key));
-                                if(foundItem) values.push(item.find(value => value.positionIPath.startsWith(key)).value);
-                            }
+                    const resultKeys = Object.keys(result);
 
-                            found.push({key:key, iPath: iPath, values:values});
-                        }
-                        if(found) {
-                            const checkMap = {};
-
-                            found.forEach(v => {
-                                const key = v.values.join();
-                                if (!checkMap[key]) checkMap[key] = [];
-                                checkMap[key].push(v.iPath);
-                            });
-                            finalCheckSum.push(checkMap);
-
+                    for (const resultKey of resultKeys) {
+                        const str = result[resultKey].join(' , ');
+                        if (!upsideDownResult[str]) upsideDownResult[str] = [];
+                        upsideDownResult[str].push(resultKey);
+                    }
+                    const upsideDownResultKeys = Object.keys(upsideDownResult);
+                    for (const upsideDownResultKey of upsideDownResultKeys) {
+                        if(upsideDownResult[upsideDownResultKey].length > 1) {
+                            errorList.push(`Trigger Condition [${upsideDownResultKey}] is duplicated on ${upsideDownResult[upsideDownResultKey].join(' , ')}`)
                         }
                     }
                 }
-                if(finalCheckSum) {
-                    let resultDescription = [];
-                    finalCheckSum.forEach(check => {
-                        const keys = Object.keys(check);
-                        for(const key of keys) {
-                            if(!key || key === '') {
 
-                            }if(check[key].length > 1) {
-                                resultDescription.push('Duplicated trigger condition found:{' + check[key].join(' , ') + '}');
-                            }
-                        }
-                    });
-                    return resultDescription;
-                }
+                return errorList;
             }
         }
         return ['Check Failed'];
