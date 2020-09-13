@@ -160,7 +160,7 @@ public class UserController {
 			registeredAccount.setUsername(generatedUsername);
 			registeredAccount.setAccountType(account.getAccountType());
 			registeredAccount.setEmail(account.getEmail());
-			registeredAccount.setPending(true);
+			registeredAccount.setPending(false);
 
 			accountRepository.save(registeredAccount);
 		} catch (Exception e) {
@@ -191,13 +191,13 @@ public class UserController {
 
 		// Generate url and email
 
-		String url = getUrl(request) + "/#/registerResetPassword?userId="
-				+ account.getUsername() + "&username=" + account.getUsername()
-				+ "&token="
-				+ UriUtils.encodeQueryParam(arp.getCurrentToken(), "UTF-8");
+//		String url = getUrl(request) + "/#/registerResetPassword?userId="
+//				+ account.getUsername() + "&username=" + account.getUsername()
+//				+ "&token="
+//				+ UriUtils.encodeQueryParam(arp.getCurrentToken(), "UTF-8");
 
 		// generate and send email
-		this.sendAccountRegistrationPasswordResetNotification(account, url);
+//		this.sendAccountRegistrationPasswordResetNotification(account, url);
 
 		return new ResponseMessage(ResponseMessage.Type.success, "userAdded",
 				account.getUsername());
@@ -250,7 +250,7 @@ public class UserController {
 				+ UriUtils.encodeQueryParam(arp.getCurrentToken(), "UTF-8");
 
 		// generate and send email
-		this.sendAccountRegistrationPasswordResetNotification(acc, url);
+//		this.sendAccountRegistrationPasswordResetNotification(acc, url);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"resentRegistrationInvite", acc.getUsername());
@@ -273,7 +273,7 @@ public class UserController {
 		accountRepository.save(acc);
 
 		// generate and send email
-		this.sendAccountApproveNotification(acc);
+//		this.sendAccountApproveNotification(acc);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"accountApproved", acc.getUsername(), true);
@@ -346,7 +346,7 @@ public class UserController {
 		Account registeredAccount = new Account();
 		try {
 			// Make sure only desired data gets persisted
-			registeredAccount.setPending(true);
+			registeredAccount.setPending(false);
 			registeredAccount.setUsername(account.getUsername());
 			registeredAccount.setAccountType(account.getAccountType());
 			registeredAccount.setEmployer(account.getEmployer());
@@ -367,8 +367,8 @@ public class UserController {
 		}
 
 		// generate and send email
-		this.sendRegistrationNotificationToAdmin(account);
-		this.sendApplicationConfirmationNotification(account);
+//		this.sendRegistrationNotificationToAdmin(account);
+//		this.sendApplicationConfirmationNotification(account);
 
 		return new ResponseMessage(ResponseMessage.Type.success, "userAdded",
 				registeredAccount.getId().toString(), "true");
@@ -431,7 +431,7 @@ public class UserController {
 		// System.out.println("****************** "+url+" *******************");
 
 		// generate and send email
-		this.sendAccountPasswordResetRequestNotification(acc, url);
+//		this.sendAccountPasswordResetRequestNotification(acc, url);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"resetRequestProcessed", acc.getId().toString(), true);
@@ -467,7 +467,7 @@ public class UserController {
 				acc.getNewPassword());
 
 		// send email notification
-		this.sendChangeAccountPasswordNotification(onRecordAccount);
+//		this.sendChangeAccountPasswordNotification(onRecordAccount);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"accountPasswordReset", onRecordAccount.getId().toString(),
@@ -504,7 +504,7 @@ public class UserController {
 				acc.getNewPassword());
 
 		// send email notification
-		this.sendChangeAccountPasswordNotification(onRecordAccount, newPassword);
+//		this.sendChangeAccountPasswordNotification(onRecordAccount, newPassword);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"accountPasswordReset", onRecordAccount.getId().toString(),
@@ -579,7 +579,7 @@ public class UserController {
 		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ 3 ^^^^^^^^^^^^^^^^^^");
 
 		// send email notification
-		this.sendResetAccountPasswordNotification(onRecordAccount);
+//		this.sendResetAccountPasswordNotification(onRecordAccount);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"accountPasswordReset", onRecordAccount.getId().toString());
@@ -665,7 +665,7 @@ public class UserController {
 		accountResetPasswordRepository.save(apr);
 
 		// send email notification
-		this.sendResetRegistrationAccountPasswordNotification(onRecordAccount);
+//		this.sendResetRegistrationAccountPasswordNotification(onRecordAccount);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"registeredAccountPasswordReset", onRecordAccount.getId()
@@ -690,7 +690,7 @@ public class UserController {
 		}
 
 		// send email with username
-		this.sendRetrieveForgottenUsernameNotification(acc);
+//		this.sendRetrieveForgottenUsernameNotification(acc);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"usernameFound", email);

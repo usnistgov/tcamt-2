@@ -8756,7 +8756,12 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
             return [];
         },
         getTemplate: function (node) {
-            if(node.type == 'field') return 'FieldTree.html';
+            if(node.type == 'field') {
+                if(node.orderIndifferentInfo) {
+                    node.orderIndifferentInfo.orderIndifferent = !node.orderIndifferentInfo.orderSpecific;
+                }
+                return 'FieldTree.html';
+            }
             else if (node.type == 'component') return 'ComponentTree.html';
             else if (node.type == 'subcomponent') return 'SubComponentTree.html';
             else return 'FieldTree.html';
@@ -10169,6 +10174,31 @@ angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope
         return null;
     };
 
+    $scope.updateParsingResult = function() {
+
+        let found = $rootScope.selectedTestStep.orderIndifferentInfoMap[$scope.orderIndifferentInfo.currentIPositionPath];
+        if(!found) {
+            found = $rootScope.selectedTestStep.orderIndifferentInfoMap[$scope.orderIndifferentInfo.currentPositionPath];
+        }
+
+        if(found){
+            $scope.relatedSegmentList.forEach(seg => {
+                if(seg.parsingResult) {
+                    for(const item of seg.parsingResult) {
+                        for (const listItem of found.triggerInfo.list) {
+                            console.log(seg.path + '.' + item.path, listItem.namePath);
+                            if ((seg.path + '.' + item.path).substring($scope.orderIndifferentInfo.currentPath.length + 1) === listItem.namePath) {
+                                item.isTrigger = true;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+    };
+
     $scope.relatedSegmentList.forEach(seg => {
         seg.parsingResult = [];
         const segmentId = seg.segmentDef.id;
@@ -10233,12 +10263,13 @@ angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope
 
             }
         }
+
+        $scope.updateParsingResult();
     });
 
     $scope.cancel = function() {
         $modalInstance.dismiss('cancel');
     };
-
     $scope.saveTrigger = function() {
         $rootScope.selectedTestStep.orderIndifferentInfoMap[$scope.orderIndifferentInfo.currentIPositionPath] = {
             orderSpecific : true,
