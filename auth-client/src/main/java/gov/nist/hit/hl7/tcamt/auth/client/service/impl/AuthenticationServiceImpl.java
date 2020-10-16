@@ -52,6 +52,8 @@ import gov.nist.hit.hl7.auth.util.requests.UserResponse;
 import gov.nist.hit.hl7.tcamt.auth.client.exception.AuthenticationException;
 import gov.nist.hit.hl7.tcamt.auth.client.service.AuthenticationService;
 
+import java.nio.charset.StandardCharsets;
+import com.google.common.hash.Hashing;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -136,9 +138,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       HttpHeaders headers = new HttpHeaders();
       headers.add("Content-type", "application/json");
       HttpEntity<LoginRequest> request = new HttpEntity<>(user);
+      if (user.getOldMethod()) {
+        String sha256hex = Hashing.sha256()
+          .hashString(user.getPassword() + "{" + user.getUsername() + "}", StandardCharsets.UTF_8)
+          .toString();
+        user.setPassword(sha256hex);
+      }
       System.out.println(env.getProperty(AUTH_URL));
       ResponseEntity<ConnectionResponseMessage<UserResponse>> call =
-          restTemplate.exchange(env.getProperty(AUTH_URL) + "/api/login", HttpMethod.POST, request,
+          restTemplate.exchange(env.getProperty(AUTH_URL) + "/api/tool/login", HttpMethod.POST, request,
               new ParameterizedTypeReference<ConnectionResponseMessage<UserResponse>>() {});
       call.getBody().setHide(true);
       if (call.getStatusCode() == HttpStatus.OK) {
@@ -181,7 +189,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
       ResponseEntity<ConnectionResponseMessage<UserResponse>> response =
-          restTemplate.exchange(env.getProperty(AUTH_URL) + "/api/register", HttpMethod.POST, request,
+          restTemplate.exchange(env.getProperty(AUTH_URL) + "/api/tool/register", HttpMethod.POST, request,
               new ParameterizedTypeReference<ConnectionResponseMessage<UserResponse>>() {});
 
 
@@ -218,7 +226,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       HttpEntity<ChangePasswordRequest> request =
           new HttpEntity<ChangePasswordRequest>(changePasswordRequest);
       ResponseEntity<ConnectionResponseMessage<PasswordResetTokenResponse>> response = restTemplate
-          .exchange(env.getProperty(AUTH_URL) + "/api/password/reset", HttpMethod.POST, request,
+          .exchange(env.getProperty(AUTH_URL) + "/api/tool/password/reset", HttpMethod.POST, request,
               new ParameterizedTypeReference<ConnectionResponseMessage<PasswordResetTokenResponse>>() {});
       return response.getBody();
     } catch (HttpClientErrorException e) {
@@ -243,7 +251,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
       HttpEntity<String> request = new HttpEntity<String>(token);
       ResponseEntity<Boolean> response =
-          restTemplate.exchange(env.getProperty(AUTH_URL) + "/api/password/validatetoken",
+          restTemplate.exchange(env.getProperty(AUTH_URL) + "/api/tool/password/validatetoken",
               HttpMethod.POST, request, Boolean.class);
       return response.getBody();
     } catch (HttpClientErrorException e) {
@@ -276,7 +284,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       HttpEntity<ChangePasswordConfirmRequest> request =
           new HttpEntity<ChangePasswordConfirmRequest>(requestObject);
       ResponseEntity<ConnectionResponseMessage<PasswordResetTokenResponse>> response = restTemplate
-          .exchange(env.getProperty(AUTH_URL) + "/api/password/reset/confirm", HttpMethod.POST, request,
+          .exchange(env.getProperty(AUTH_URL) + "/api/tool/password/reset/confirm", HttpMethod.POST, request,
               new ParameterizedTypeReference<ConnectionResponseMessage<PasswordResetTokenResponse>>() {});
       return response.getBody();
 
