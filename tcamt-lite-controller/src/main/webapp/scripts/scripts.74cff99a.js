@@ -8014,6 +8014,22 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
             waitingDialog.hide();
         }
     };
+    $scope.selectSegmentByPath = function (path) {
+        let selectedSeg = $scope.findFirstSegmentByPath(path);
+        if(selectedSeg !== null) {
+            $scope.selectSegment(selectedSeg);
+        }
+    };
+
+    $scope.findFirstSegmentByPath= function (path) {
+        for(let i in $rootScope.segmentList){
+            if($rootScope.segmentList[i].iPath.indexOf(path.replace(/\s/g, '')) > -1) {
+                return $rootScope.segmentList[i];
+            }
+        }
+        return null;
+    };
+
     $scope.selectSegment = function (segment) {
         waitingDialog.show('Loading Segment...', {dialogSize: 'xs', progressType: 'info'});
         $scope.testDataAccordi.segmentList = false;
@@ -8238,6 +8254,59 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         return 'Not found';
     };
 
+    $scope.retrieveTriggerInfoForSpecificNodeByPath = function (path) {
+        const selectedSeg = $scope.findFirstSegmentByPath(path);
+        let retrieveTrigger = {};
+        if(selectedSeg && selectedSeg.positionIPath && selectedSeg.positionPath) {
+            const iPathList = selectedSeg.iPath.split('.');
+            const iPositionPathList = selectedSeg.positionIPath.split('.');
+            const positionPathList = selectedSeg.positionPath.split('.');
+            const pathList = selectedSeg.path.split('.');
+            let currentIPath = '';
+            let currentIPositionPath = '';
+            let currentPositionPath = '';
+            let currentPath = '';
+            for(let i = 0; i < iPositionPathList.length; i++){
+                if(i === 0) {
+                    currentIPath = iPathList[0];
+                    currentIPositionPath = iPositionPathList[0];
+                    currentPositionPath = positionPathList[0];
+                    currentPath = pathList[0];
+                } else {
+                    currentIPath = currentIPath + "." + iPathList[i];
+                    currentIPositionPath = currentIPositionPath + "-" + iPositionPathList[i];
+                    currentPositionPath = currentPositionPath + "-" + positionPathList[i];
+                    currentPath = currentPath + "." + pathList[i];
+                }
+
+                let triggerInfo;
+                let orderIndifferentInfo = $rootScope.selectedTestStep.orderIndifferentInfoMap[currentIPositionPath];
+                if(orderIndifferentInfo && orderIndifferentInfo.orderSpecific) {
+                    triggerInfo = orderIndifferentInfo.triggerInfo;
+                    triggerInfo.type = 'local';
+                }
+
+                if (!triggerInfo) {
+                    orderIndifferentInfo = $rootScope.selectedTestStep.orderIndifferentInfoMap[currentPositionPath];
+                }
+                if(orderIndifferentInfo && orderIndifferentInfo.orderSpecific) {
+                    triggerInfo = orderIndifferentInfo.triggerInfo;
+                }
+
+                if(triggerInfo) {
+                    retrieveTrigger = {
+                        currentIPath : currentIPath,
+                        currentIPositionPath : currentIPositionPath,
+                        currentPositionPath : currentPositionPath,
+                        currentPath : currentPath,
+                        triggerInfo : triggerInfo,
+                    };
+                }
+            }
+        }
+        return retrieveTrigger;
+    };
+
     $scope.retrieveTriggerInfoForSpecificNode = function (selectedSegmentNode, orderIndifferentInfoMap) {
         $scope.retrieveTriggers = [];
         if(selectedSegmentNode && selectedSegmentNode.iPositionPath && selectedSegmentNode.postionPath) {
@@ -8352,6 +8421,108 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         return [];
     }
 
+    $scope.findLocationTriggerValue = function(str){
+        let result = str.split('^');
+        result.shift();
+
+        if(result.length > 0) return result;
+
+        return null;
+    }
+
+    $scope.checkDuplication = function(list, item) {
+        console.log(item, list);
+        for (let i = 0; i < list.length; i++){
+            if(list[i].split('^')[0] !== item && list[i].split('^')[0].indexOf(item) > -1) return true;
+        }
+        return false;
+    }
+    $scope.findRelatedSegmentInstancePaths = function (orderIndifferentNode, segmentList) {
+        if(orderIndifferentNode){
+            const orderIndifferentNodePositionPath = $scope.replaceAll(orderIndifferentNode.positionPath, "-" , ".");
+            if(orderIndifferentNode.orderIndifferentInfo && orderIndifferentNode.orderIndifferentInfo.triggerInfo && orderIndifferentNode.orderIndifferentInfo.triggerInfo.list){
+                let errorList = [];
+                const orderIndifferentNodePositionPathSize = orderIndifferentNodePositionPath.split('.').length;
+                const relatedSegmentsList = segmentList.filter(seg => seg.positionPath.startsWith(orderIndifferentNodePositionPath));
+
+                let relatedSegmentsMap = {};
+                for(let i = 0; i < relatedSegmentsList.length; i++){
+
+                    const iPath = relatedSegmentsList[i].iPath;
+                    let key = '';
+                    for(let j = 0; j < orderIndifferentNodePositionPathSize - 1; j++){
+                        key = key + '.' + iPath.split('.')[j];
+                    }
+                    if (key === '') key = 'root';
+                    else key = key.substring(1);
+                    if (!relatedSegmentsMap[key]) relatedSegmentsMap[key] = [];
+
+                    relatedSegmentsMap[key].push(relatedSegmentsList[i]);
+                }
+
+                const keys = Object.keys(relatedSegmentsMap);
+                for (const key of keys) {
+                    let result = {};
+                    const segList = relatedSegmentsMap[key];
+                    segList.forEach(seg => {
+                        let positionIPath = '';
+                        let iPath = '';
+                        const size = orderIndifferentNode.positionPath.split('-').length;
+
+                        for(let i=0; i < size; i++) {
+                            positionIPath = positionIPath + '-' + seg.positionIPath.split('.')[i];
+                            iPath = iPath + '.' + seg.iPath.split('.')[i];
+                        }
+                        positionIPath = positionIPath.substring(1);
+                        iPath = iPath.substring(1);
+
+                        let orderIndifferentInfo = $rootScope.selectedTestStep.orderIndifferentInfoMap[positionIPath];
+
+                        if(!orderIndifferentInfo) {
+                            orderIndifferentInfo = orderIndifferentNode.orderIndifferentInfo;
+                        }
+
+                        let triggerKeyValuePaths = orderIndifferentInfo.triggerInfo.list.map(item => {
+                            return orderIndifferentNodePositionPath + '.' + item.positionPath;
+                        });
+
+                        triggerKeyValuePaths = triggerKeyValuePaths.sort();
+                        triggerKeyValuePaths.forEach(triggerKeyValuePath => {
+                            if(triggerKeyValuePath.startsWith(seg.positionPath)) {
+                                const valuePathInSeg = triggerKeyValuePath.substring(seg.positionPath.length + 1);
+                                let value = seg.lineStr;
+                                const fieldPosition = valuePathInSeg.split('.')[0];
+                                const componentPosition = valuePathInSeg.split('.')[1];
+                                const subComponentPosition = valuePathInSeg.split('.')[2];
+
+                                if(fieldPosition) {
+                                    value = value.split('|')[fieldPosition];
+                                }
+                                if(componentPosition) {
+                                    value = value.split('^')[componentPosition-1];
+                                }
+                                if(subComponentPosition) {
+                                    value = value.split('&')[subComponentPosition-1];
+                                }
+                                if(!result[iPath]) result[iPath] = [];
+                                result[iPath].push(`${seg.segmentName}-${valuePathInSeg} = ${value}`);
+                            }
+                        });
+                    });
+                    const resultKeys = Object.keys(result);
+
+                    for (const resultKey of resultKeys) {
+                        const str = result[resultKey].join(' , ');
+                        errorList.push([str, resultKey].join('^'));
+                    }
+                }
+
+                return errorList;
+            }
+        }
+        return [];
+    };
+
     $scope.checkDuplicatedTriggerValue = function (orderIndifferentNode, segmentList) {
         if(orderIndifferentNode){
             const orderIndifferentNodePositionPath = $scope.replaceAll(orderIndifferentNode.positionPath, "-" , ".");
@@ -8428,6 +8599,8 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 
                     const resultKeys = Object.keys(result);
 
+                    console.log(resultKeys);
+
                     for (const resultKey of resultKeys) {
                         const str = result[resultKey].join(' , ');
                         if (!upsideDownResult[str]) upsideDownResult[str] = [];
@@ -8435,16 +8608,14 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
                     }
                     const upsideDownResultKeys = Object.keys(upsideDownResult);
                     for (const upsideDownResultKey of upsideDownResultKeys) {
-                        if(upsideDownResult[upsideDownResultKey].length > 1) {
-                            errorList.push(`Trigger Condition [${upsideDownResultKey}] is duplicated on ${upsideDownResult[upsideDownResultKey].join(' , ')}`)
-                        }
+                            errorList.push([upsideDownResultKey, ...upsideDownResult[upsideDownResultKey]].join('^'));
                     }
                 }
 
                 return errorList;
             }
         }
-        return ['Check Failed'];
+        return [];
     };
 
     $scope.removeSpecificTriggerCondition = function (orderIndifferentInfo) {
@@ -10133,10 +10304,16 @@ angular.module('tcl').controller('OpenApplyMessageTemplate', function($scope, $m
 });
 
 angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope, $http, $rootScope, profileData, conformanceProfile, $modalInstance, orderIndifferentInfo) {
+    console.log($rootScope.selectedTestStep.testDataCategorizationMap);
     $scope.orderIndifferentInfo = orderIndifferentInfo;
     $scope.relatedSegmentList = $rootScope.segmentList.filter(seg => seg.iPath.startsWith($scope.orderIndifferentInfo.currentIPath));
     $scope.profileData = profileData;
     $scope.conformanceProfile = conformanceProfile;
+    $scope.activeTab = [];
+    $scope.relatedSegmentList.forEach((item, index) => {
+        if (index === 0 ) $scope.activeTab[index] = !$scope.activeTab[index];
+        else $scope.activeTab[index] = false;
+    });
 
     $scope.retriveDatatypeByComponent = function (datatypeId) {
         const dt = _.find($scope.profileData.integrationProfile.datatypes, function(d){
@@ -10174,6 +10351,17 @@ angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope
         return null;
     };
 
+    $scope.retriveUsageByField = function (segmentId, i) {
+        const seg = _.find($scope.profileData.integrationProfile.segments, function(seg){
+            return seg.id == segmentId;
+        });
+
+        if(seg) {
+            return seg.children[i-1].usage;
+        }
+        return null;
+    };
+
     $scope.updateParsingResult = function() {
 
         let found = $rootScope.selectedTestStep.orderIndifferentInfoMap[$scope.orderIndifferentInfo.currentIPositionPath];
@@ -10181,10 +10369,10 @@ angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope
             found = $rootScope.selectedTestStep.orderIndifferentInfoMap[$scope.orderIndifferentInfo.currentPositionPath];
         }
 
-        if(found){
+        if(found) {
             $scope.relatedSegmentList.forEach(seg => {
-                if(seg.parsingResult) {
-                    for(const item of seg.parsingResult) {
+                if (seg.parsingResult) {
+                    for (const item of seg.parsingResult) {
                         for (const listItem of found.triggerInfo.list) {
                             console.log(seg.path + '.' + item.path, listItem.namePath);
                             if ((seg.path + '.' + item.path).substring($scope.orderIndifferentInfo.currentPath.length + 1) === listItem.namePath) {
@@ -10195,8 +10383,10 @@ angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope
                 }
             });
         }
+    };
 
-
+    $scope.replaceDot2Dash = function(path){
+        return path.split('.').join('-');
     };
 
     $scope.relatedSegmentList.forEach(seg => {
@@ -10208,6 +10398,10 @@ angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope
             const fValue = fieldList[i];
             if (fValue && fValue !== '') {
                 let fDT = null;
+                let fUsage = null;
+                const fIPath = seg.iPath + "." + i + "[1]";
+                const fTD =  $rootScope.selectedTestStep.testDataCategorizationMap[$scope.replaceDot2Dash(fIPath)];
+                fUsage = $scope.retriveUsageByField(segmentId, i);
                 if(seg.segmentName === 'OBX' && i === 5) {
                     fDT = $scope.retriveDatatypeByField(segmentId, 5, fieldList[2]);
                 } else {
@@ -10219,7 +10413,9 @@ angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope
                             {
                                 path : i,
                                 value : fValue,
+                                usage : fUsage,
                                 dt : fDT.name,
+                                td: fTD,
                             }
                         );
                     } else {
@@ -10228,13 +10424,19 @@ angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope
                             const cValue = componentList[j];
                             if (cValue && cValue !== '') {
                                 const cDT = $scope.retriveDatatypeByComponent(fDT.children[j].datatypeId);
+                                const cUsage = fDT.children[j].usage;
+                                const cIPath = fIPath + "." + (j + 1) + "[1]";
+                                const cTD =  $rootScope.selectedTestStep.testDataCategorizationMap[$scope.replaceDot2Dash(cIPath)];
                                 if(cDT) {
                                     if(!cDT.children) {
                                         seg.parsingResult.push(
                                             {
                                                 path : i + '.' + (j + 1),
                                                 value : cValue,
+                                                usage : cUsage,
                                                 dt : cDT.name,
+                                                td : cIPath,
+                                                td: cTD,
                                             }
                                         );
                                     } else {
@@ -10243,12 +10445,17 @@ angular.module('tcl').controller('SpecificTriggerEditModalCtrl', function($scope
                                             const scValue = subComponentList[k];
                                             if (scValue && scValue !== '') {
                                                 const scDT = $scope.retriveDatatypeByComponent(cDT.children[k].datatypeId);
+                                                const scUsage = cDT.children[k].usage;
+                                                const scIPath = cIPath + "." + (k + 1) + "[1]";
+                                                const scTD =  $rootScope.selectedTestStep.testDataCategorizationMap[$scope.replaceDot2Dash(scIPath)];
                                                 if(scDT) {
                                                     seg.parsingResult.push(
                                                         {
                                                             path : i + '.' + (j + 1) + '.' + (k + 1),
                                                             value : scValue,
+                                                            usage : scUsage,
                                                             dt : scDT.name,
+                                                            td : scTD,
                                                         }
                                                     );
                                                 }
@@ -10452,9 +10659,9 @@ angular.module('tcl').controller('TriggerEditModalCtrl', function($scope, $rootS
         if($scope.selectedNode.orderIndifferentInfo.triggerInfo){
             if($scope.selectedNode.orderIndifferentInfo.triggerInfo.list && $scope.selectedNode.orderIndifferentInfo.triggerInfo.list.length === 1){
                 if($scope.selectedNode.type === 'segment'){
-                    $scope.selectedNode.orderIndifferentInfo.triggerInfo.description = "The value of " + this.getSegmentByRef($scope.selectedNode.ref).name + '-' + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[0].namePath;
+                    $scope.selectedNode.orderIndifferentInfo.triggerInfo.description = "Primary Trigger: " + this.getSegmentByRef($scope.selectedNode.ref).name + '-' + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[0].namePath;
                 }else if($scope.selectedNode.type === 'group'){
-                    $scope.selectedNode.orderIndifferentInfo.triggerInfo.description =  "The value of " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[0].namePath;
+                    $scope.selectedNode.orderIndifferentInfo.triggerInfo.description =  "Primary Trigger: " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[0].namePath;
                 }
             }else if($scope.selectedNode.orderIndifferentInfo.triggerInfo.list && $scope.selectedNode.orderIndifferentInfo.triggerInfo.list.length > 1){
                 if($scope.selectedNode.orderIndifferentInfo.triggerInfo.operation) {
@@ -10463,15 +10670,15 @@ angular.module('tcl').controller('TriggerEditModalCtrl', function($scope, $rootS
                     for(var i in $scope.selectedNode.orderIndifferentInfo.triggerInfo.list) {
                         if(i == 0) {
                             if($scope.selectedNode.type === 'segment'){
-                                result = "[The value of " + this.getSegmentByRef($scope.selectedNode.ref).name + '-' + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
+                                result = "[Global Trigger: " + this.getSegmentByRef($scope.selectedNode.ref).name + '-' + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
                             }else if($scope.selectedNode.type === 'group'){
-                                result =  "[The value of " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
+                                result =  "[Global Trigger: " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
                             }
                         }else {
                             if($scope.selectedNode.type === 'segment'){
-                                result = result + " " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.operation + " [The value of " + this.getSegmentByRef($scope.selectedNode.ref).name + '-' + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
+                                result = result + " " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.operation + " [Primary Trigger: " + this.getSegmentByRef($scope.selectedNode.ref).name + '-' + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
                             }else if($scope.selectedNode.type === 'group'){
-                                result = result + " " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.operation + " [The value of " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
+                                result = result + " " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.operation + " [Primary Trigger: " + $scope.selectedNode.orderIndifferentInfo.triggerInfo.list[i].namePath + "]";
                             }
                         }
                     }

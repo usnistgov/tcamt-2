@@ -316,8 +316,8 @@
 																<td>
 																	<div ng-if="orderIndifferentInfo && orderIndifferentInfo.triggerInfo && orderIndifferentInfo.triggerInfo.list" ng-repeat="triggerInfo in orderIndifferentInfo.triggerInfo.list">
 																		<li>
-																			<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" class="label label-success label-icon ">Global</span>
-																			<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" class="label label-info label-icon ">Local</span>
+																			<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" class="label label-success label-icon ">Primary</span>
+																			<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" class="label label-info label-icon ">Secondary</span>
 																			{{orderIndifferentInfo.currentIPath}}.{{triggerInfo.namePath}} = {{retrieveValue(orderIndifferentInfo, triggerInfo)}}
 																		</li>
 																	</div>
@@ -326,9 +326,9 @@
 																	</div>
 																</td>
 																<td>
-																	<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-plus-circle fa-fw"></i>Create Local Trigger</span>
-																	<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-pencil fa-fw"></i>Edit Local Trigger</span>
-																	<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" ng-click="removeSpecificTriggerCondition(orderIndifferentInfo)" class="label label-field label-icon"><i class="fa fa-times-circle fa-fw"></i>Remove Local Trigger</span>
+																	<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-plus-circle fa-fw"></i>Create Secondary Trigger</span>
+																	<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-pencil fa-fw"></i>Edit Secondary Trigger</span>
+																	<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" ng-click="removeSpecificTriggerCondition(orderIndifferentInfo)" class="label label-field label-icon"><i class="fa fa-times-circle fa-fw"></i>Remove Secondary Trigger</span>
 																</td>
 															</tr>
 															</tbody>
@@ -426,11 +426,11 @@
 												<table tt-table tt-params="profileParams" class="table table-bordered table-condensed profile-table" id="profileTable">
 													<thead>
 													<tr class="tbl-header">
-														<th class="col-md-2">Name</th>
+														<th class="col-md-3">Name</th>
 														<th class="col-md-1">Usage</th>
 														<th class="col-md-1">Cardi.</th>
 														<th class="col-md-1">OrderIndifferent</th>
-														<th class="col-md-3">Key Value</th>
+														<th class="col-md-6">Trigger Condition</th>
 													</tr>
 													</thead>
 													<tbody></tbody>
@@ -622,12 +622,51 @@
 				<input type="checkbox" ng-model="node.orderIndifferentInfo.orderSpecific">
 			</div>
 		</td>
-		<td class="col-md-1">
+		<td class="col-md-6">
 			<div ng-if="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && node.orderIndifferentInfo.triggerInfo.description">
 				<span ng-click="openTriggerDialog(node)">{{node.orderIndifferentInfo.triggerInfo.description}} <i class="fa fa-pencil fa-fw"></i></span>
-				<ul style="list-style: none;">
-					<li ng-repeat="e in checkDuplicatedTriggerValue(node, segmentList)" style="color: red"><i class="fa fa-exclamation-triangle fa-fw"></i>{{::e}}</li>
-				</ul>
+
+				<div ng-if="node.orderIndifferentInfo.triggerInfo.description !== 'Trigger is not set'" class="table-responsive">
+					<table class="table table-bordered table-condensed profile-table">
+						<thead>
+						<tr class="tbl-header">
+							<th class="col-md-3">OrderIndifferent Node</th>
+							<th class="col-md-6">Trigger Conditions</th>
+							<th class="col-md-3">Edit Trigger</th>
+						</tr>
+						</thead>
+						<tbody>
+
+						<div x="{{myList = findRelatedSegmentInstancePaths(node, segmentList)}}">
+							<tr ng-repeat="item in myList">
+								<td>
+									<span ng-click="selectSegmentByPath(item.split('^')[1])">{{item.split('^')[1]}}</span>
+								</td>
+								<td>
+									<div y="{{orderIndifferentInfo = retrieveTriggerInfoForSpecificNodeByPath(item.split('^')[1])}}">
+										<div ng-if="orderIndifferentInfo && orderIndifferentInfo.triggerInfo && orderIndifferentInfo.triggerInfo.list" ng-repeat="triggerInfo in orderIndifferentInfo.triggerInfo.list">
+											<li>
+												<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" class="label label-success label-icon ">Primary</span>
+												<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" class="label label-info label-icon ">Secondary</span>
+												{{orderIndifferentInfo.currentIPath}}.{{triggerInfo.namePath}} = {{retrieveValue(orderIndifferentInfo, triggerInfo)}}
+											</li>
+										</div>
+										<span ng-repeat="error in checkTriggerError(orderIndifferentInfo)" style="color: red"><i class="fa fa-exclamation-triangle fa-fw"></i>{{error}}</span>
+									</div>
+								</td>
+								<td>
+									<div y="{{orderIndifferentInfo = retrieveTriggerInfoForSpecificNodeByPath(item.split('^')[1])}}">
+										<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-plus-circle fa-fw"></i>Create Secondary Trigger</span>
+										<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-pencil fa-fw"></i>Edit Secondary Trigger</span>
+										<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" ng-click="removeSpecificTriggerCondition(orderIndifferentInfo);" class="label label-field label-icon"><i class="fa fa-times-circle fa-fw"></i>Remove Secondary Trigger</span>
+									</div>
+								</td>
+							</tr>
+						</div>
+
+						</tbody>
+					</table>
+				</div>
 			</div>
 			<div ng-show="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && !node.orderIndifferentInfo.triggerInfo.description">
 				<span ng-click="openTriggerDialog(node)"><i class="fa fa-pencil fa-fw"></i> Create Trigger</span>
@@ -648,12 +687,51 @@
 				<input type="checkbox" ng-model="node.orderIndifferentInfo.orderSpecific">
 			</div>
 		</td>
-		<td class="col-md-1">
-			<div ng-show="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && node.orderIndifferentInfo.triggerInfo.description">
+		<td class="col-md-6">
+			<div ng-if="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && node.orderIndifferentInfo.triggerInfo.description">
 				<span ng-click="openTriggerDialog(node)">{{node.orderIndifferentInfo.triggerInfo.description}} <i class="fa fa-pencil fa-fw"></i></span>
-				<ul style="list-style: none;">
-					<li ng-repeat="e in checkDuplicatedTriggerValue(node, segmentList)" style="color: red"><i class="fa fa-exclamation-triangle fa-fw"></i>{{::e}}</li>
-				</ul>
+
+				<div ng-if="node.orderIndifferentInfo.triggerInfo.description !== 'Trigger is not set'" class="table-responsive">
+					<table class="table table-bordered table-condensed profile-table">
+						<thead>
+						<tr class="tbl-header">
+							<th class="col-md-3">OrderIndifferent Node</th>
+							<th class="col-md-6">Trigger Conditions</th>
+							<th class="col-md-3">Edit Trigger</th>
+						</tr>
+						</thead>
+						<tbody>
+
+						<div x="{{myList = findRelatedSegmentInstancePaths(node, segmentList)}}">
+							<tr ng-repeat="item in myList">
+								<td>
+									<span ng-click="selectSegmentByPath(item.split('^')[1])">{{item.split('^')[1]}}</span>
+								</td>
+								<td>
+									<div y="{{orderIndifferentInfo = retrieveTriggerInfoForSpecificNodeByPath(item.split('^')[1])}}">
+										<div ng-if="orderIndifferentInfo && orderIndifferentInfo.triggerInfo && orderIndifferentInfo.triggerInfo.list" ng-repeat="triggerInfo in orderIndifferentInfo.triggerInfo.list">
+											<li>
+												<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" class="label label-success label-icon ">Primary</span>
+												<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" class="label label-info label-icon ">Secondary</span>
+												{{orderIndifferentInfo.currentIPath}}.{{triggerInfo.namePath}} = {{retrieveValue(orderIndifferentInfo, triggerInfo)}}
+											</li>
+										</div>
+										<span ng-repeat="error in checkTriggerError(orderIndifferentInfo)" style="color: red"><i class="fa fa-exclamation-triangle fa-fw"></i>{{error}}</span>
+									</div>
+								</td>
+								<td>
+									<div y="{{orderIndifferentInfo = retrieveTriggerInfoForSpecificNodeByPath(item.split('^')[1])}}">
+										<span ng-if="orderIndifferentInfo.triggerInfo.type !== 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-plus-circle fa-fw"></i>Create Secondary Trigger</span>
+										<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" ng-click="openSpecificTriggerDialog(orderIndifferentInfo)" class="label label-segment label-icon"><i class="fa fa-pencil fa-fw"></i>Edit Secondary Trigger</span>
+										<span ng-if="orderIndifferentInfo.triggerInfo.type === 'local'" ng-click="removeSpecificTriggerCondition(orderIndifferentInfo);" class="label label-field label-icon"><i class="fa fa-times-circle fa-fw"></i>Remove Secondary Trigger</span>
+									</div>
+								</td>
+							</tr>
+						</div>
+
+						</tbody>
+					</table>
+				</div>
 			</div>
 			<div ng-show="node.orderIndifferentInfo && node.orderIndifferentInfo.orderSpecific === true && !node.orderIndifferentInfo.triggerInfo.description">
 				<span ng-click="openTriggerDialog(node)"><i class="fa fa-pencil fa-fw"></i> Create Trigger</span>
@@ -921,13 +999,16 @@
 		</td>
 		<td class="col-md-1"/>
     </tr></script> <script type="text/ng-template" id="SpecificTriggerEditModal.html"><div class="modal-header">
-		<h3 class="modal-title">Edit Specific Trigger Conditions</h3>
+		<h3 class="modal-title">Edit Secondary Trigger Conditions</h3>
 	</div>
 	<div class="modal-body">
-		<uib-accordion close-others="false">
-			<uib-accordion-group ng-repeat="seg in relatedSegmentList">
+		<uib-accordion close-others="true">
+			<uib-accordion-group ng-repeat="seg in relatedSegmentList" is-open="activeTab[$index]">
 				<uib-accordion-heading>
-					{{seg.iPath}}
+					<span style="color:white !important;">
+						<i class="fa" ng-class="{'fa-caret-down': activeTab[$index], 'fa-caret-right': !activeTab[$index]}"></i>
+						<i class="fa fa-file-text-o fa-fw"></i> {{seg.iPath}}
+					</span>
 				</uib-accordion-heading>
 				<div class="col-md-12">
 					<div class="table-responsive">
@@ -935,9 +1016,11 @@
 							<thead>
 							<tr class="tbl-header">
 								<th class="col-md-3">Path</th>
-								<th class="col-md-3">Datatype</th>
+								<th class="col-md-1">Datatype</th>
 								<th class="col-md-3">Value</th>
-								<th class="col-md-3">Trigger</th>
+								<th class="col-md-1">Usage</th>
+								<th class="col-md-3">TestData Cate.</th>
+								<th class="col-md-1">Trigger</th>
 							</tr>
 							</thead>
 							<tbody>
@@ -950,7 +1033,16 @@
 									{{item.value}}
 								</td>
 								<td>
-									<input type="checkbox" ng-model="item.isTrigger">
+									{{item.usage}}
+								</td>
+								<td>
+									<p ng-if="item.td">{{item.td.testDataCategorization}}</p>
+								</td>
+								<td>
+									<input ng-if="item.td
+									&& item.td.testDataCategorization
+									&& (item.td.testDataCategorization === 'Value-Test Case Fixed'
+									|| item.td.testDataCategorization === 'Value-Test Case Fixed List')" type="checkbox" ng-model="item.isTrigger">
 								</td>
 							</tr>
 							</tbody>
