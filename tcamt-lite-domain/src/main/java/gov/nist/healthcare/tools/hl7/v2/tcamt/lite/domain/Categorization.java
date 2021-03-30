@@ -1,7 +1,10 @@
 package gov.nist.healthcare.tools.hl7.v2.tcamt.lite.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Categorization {
 
@@ -30,6 +33,12 @@ public class Categorization {
 		this.name = name;
 	}
 	public List<String> getListData() {
+		Set<String> set = new HashSet<>(listData);
+		listData.clear();
+		listData.addAll(set);
+		listData.removeAll(Collections.singleton(null));
+		listData.removeAll(Collections.singleton(""));
+		System.out.println(listData);
 		return listData;
 	}
 	public void setListData(List<String> listData) {

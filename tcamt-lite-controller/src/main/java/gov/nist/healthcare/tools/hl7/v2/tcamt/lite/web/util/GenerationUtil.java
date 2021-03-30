@@ -77,6 +77,7 @@ import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.service.util.XMLManager;
 import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.web.controller.ConstraintXMLOutPut;
 import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.web.controller.DynamicInfo;
 
+
 /**
  * @author jungyubw
  *
@@ -89,7 +90,12 @@ public class GenerationUtil {
 	final String OLD_FORMAT = "yyyyMMdd";
 	final String NEW_FORMAT = "MM/dd/yyyy";
 
-	public List<SegmentInstanceData> popSegmentList(TestStepParams params, ProfileData profileData) {
+	public List<SegmentInstanceData> popSegmentList(TestStepParams params, ProfileData profileData) throws Exception{
+		System.out.println(params.getEr7Message());
+		System.out.println(params.getIntegrationProfileId());
+		System.out.println(params.getConformanceProfileId());
+		
+		System.out.println(profileData.getIntegrationProfile().getId());
 		this.segmentsInfoList = new ArrayList<SegmentInfo>();
 		this.repeatedNum = 1;
 		this.currentPosition = 0;
@@ -108,6 +114,7 @@ public class GenerationUtil {
 					int lineNum = 0;
 
 					for (String line : listLineOfMessage) {
+						System.out.println(line);
 						lineNum = lineNum + 1;
 						SegmentInstanceData segmentInstanceData = new SegmentInstanceData();
 						segmentInstanceData.setLineStr(line);
@@ -145,7 +152,7 @@ public class GenerationUtil {
 //          }
 
 					currentPosition = 0;
-
+					System.out.println(segmentInstanceDataList.size());
 					for (SegmentInstanceData sid : segmentInstanceDataList) {
 						SegmentInfo sInfo = this.findSegmentInfo(sid.getSegmentName(), null);
 						if (sInfo != null) {
@@ -163,7 +170,7 @@ public class GenerationUtil {
 //              System.out.println(currentPosition);
 						}
 					}
-
+					System.out.println(segmentInstanceDataList.size());
 					return segmentInstanceDataList;
 				}
 			}
@@ -2236,6 +2243,9 @@ public class GenerationUtil {
 			ConformanceProfile cp, ProfileData profileData) {
 		if (field.isHide())
 			return true;
+		
+		if (field.isShow())
+			return false;
 
 		if (field.getUsage().equals(Usage.R))
 			return false;
@@ -2264,6 +2274,9 @@ public class GenerationUtil {
 			String positionPath, ConformanceProfile cp, ProfileData profileData) {
 		if (component.isHide())
 			return true;
+		
+		if (component.isShow())
+			return false;
 
 		if (component.getUsage().equals(Usage.R))
 			return false;
@@ -3089,8 +3102,9 @@ public class GenerationUtil {
 	 * @param params
 	 * @param findOne
 	 * @return
+	 * @throws Exception 
 	 */
-	public ConstraintXMLOutPut getConstraintsData(ConstraintParams params, ProfileData profileData) {
+	public ConstraintXMLOutPut getConstraintsData(ConstraintParams params, ProfileData profileData) throws Exception {
 		ConstraintXMLOutPut constraintXMLOutPut = new ConstraintXMLOutPut();
 
 		TestStepParams testStepParams = new TestStepParams();

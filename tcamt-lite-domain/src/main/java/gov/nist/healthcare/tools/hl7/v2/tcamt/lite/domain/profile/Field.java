@@ -36,6 +36,8 @@ public class Field {
 
   private String bindingLocation;
   
+  private boolean show;
+  
   private boolean hide;
 
   public String getName() {
@@ -125,5 +127,13 @@ public class Field {
   public void setHide(boolean hide) {
     this.hide = hide;
   }
+
+public boolean isShow() {
+	return show;
+}
+
+public void setShow(boolean show) {
+	this.show = show;
+}
 
 }

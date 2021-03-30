@@ -34,9 +34,17 @@ public class TestStepController extends CommonController {
   ProfileService profileService;
 
   @RequestMapping(value = "/getSegmentList", method = RequestMethod.POST)
-  public List<SegmentInstanceData> popSegmentList(@RequestBody TestStepParams params) {
-    return new GenerationUtil().popSegmentList(params,
-        profileService.findOne(params.getIntegrationProfileId()));
+  public List<SegmentInstanceData> popSegmentList(@RequestBody TestStepParams params){
+	  System.out.println(params.getIntegrationProfileId());
+    try {
+		return new GenerationUtil().popSegmentList(params,
+		    profileService.findOne(params.getIntegrationProfileId()));
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+    
+    return null;
   }
 
   @RequestMapping(value = "/getSegmentNode", method = RequestMethod.POST)

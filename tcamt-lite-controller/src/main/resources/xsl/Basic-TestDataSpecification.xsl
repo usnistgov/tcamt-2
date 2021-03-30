@@ -562,6 +562,9 @@
 				<xsl:when test=".//OBX.2 = 'TS' or .//OBX.2 = 'DT'">
 					<xsl:value-of select="util:format-date(.//OBX.5.1)"/>
 				</xsl:when>
+				<xsl:when test=".//OBX.2 = 'NM' or .//OBX.2 = 'ST'">
+					<xsl:value-of select=".//OBX.5.1"/>
+				</xsl:when>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:value-of select="util:element(.//OBX.3.2, $obX.value, $ind2)"/>
@@ -760,6 +763,9 @@
 				</xsl:when>
 				<xsl:when test=".//OBX.2 = 'TS' or .//OBX.2 = 'DT'">
 					<xsl:value-of select="util:format-date(.//OBX.5.1)"/>
+				</xsl:when>
+				<xsl:when test=".//OBX.2 = 'NM' or .//OBX.2 = 'ST'">
+					<xsl:value-of select=".//OBX.5.1"/>
 				</xsl:when>
 			</xsl:choose>
 		</xsl:variable>

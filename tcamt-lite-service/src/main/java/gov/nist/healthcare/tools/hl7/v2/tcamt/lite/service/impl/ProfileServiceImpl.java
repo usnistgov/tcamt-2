@@ -159,6 +159,11 @@ public class ProfileServiceImpl implements ProfileService {
               f.setHide(true);
             else
               f.setHide(false);
+            if (childElm.getAttribute("Show") != null
+                    && childElm.getAttribute("Show").equals("true"))
+                  f.setShow(true);
+                else
+                  f.setShow(false);
             segment.addField(f);
           }
         }
@@ -246,6 +251,11 @@ public class ProfileServiceImpl implements ProfileService {
               c.setHide(true);
             else
               c.setHide(false);
+            if (childElm.getAttribute("Show") != null
+                    && childElm.getAttribute("Show").equals("true"))
+                  c.setShow(true);
+                else
+                  c.setShow(false);
             datatype.addComponent(c);
           }
         }

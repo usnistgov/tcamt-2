@@ -20,6 +20,8 @@ public class Component {
   
   private boolean hide;
   
+  private boolean show;
+  
   public Component() {
     super();
   }
@@ -95,6 +97,14 @@ public class Component {
   public void setHide(boolean hide) {
     this.hide = hide;
   }
+
+public boolean isShow() {
+	return show;
+}
+
+public void setShow(boolean show) {
+	this.show = show;
+}
 
   
 }

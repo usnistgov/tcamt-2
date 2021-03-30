@@ -9259,15 +9259,15 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 
         $rootScope.selectedTestStep.er7Message = updatedER7Message;
 
-        if(node.testDataCategorization == 'Value-Test Case Fixed List'){
-            if(node.testDataCategorizationListData.indexOf(node.value) == -1){
-                node.testDataCategorizationListData.push(node.value);
-            }
-            var testDataCategorizationObj = $rootScope.selectedTestStep.testDataCategorizationMap[$scope.replaceDot2Dash(node.iPath)];
-            if(testDataCategorizationObj.listData.indexOf(node.value) == -1){
-                testDataCategorizationObj.listData.push(node.value);
-            }
-        }
+        // if(node.testDataCategorization == 'Value-Test Case Fixed List'){
+        //     if(node.testDataCategorizationListData.indexOf(node.value) == -1){
+        //         node.testDataCategorizationListData.push(node.value);
+        //     }
+        //     var testDataCategorizationObj = $rootScope.selectedTestStep.testDataCategorizationMap[$scope.replaceDot2Dash(node.iPath)];
+        //     if(testDataCategorizationObj.listData.indexOf(node.value) == -1){
+        //         testDataCategorizationObj.listData.push(node.value);
+        //     }
+        // }
 
         $scope.recordChanged($rootScope.selectedTestStep);
     };
