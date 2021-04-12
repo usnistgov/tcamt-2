@@ -338,19 +338,19 @@ public class TestPlanController extends CommonController {
 	    try {
 	        TestPlan tp = findTestPlan(id);
 	        InputStream testPlanIO = null;
-	        Set<String> ipidSet = this.findAllProfileIdsInTestPlan(tp);
+//	        Set<String> ipidSet = this.findAllProfileIdsInTestPlan(tp);
 
 
-	          long range = 1234567L;
-	          Random r = new Random();
-	          Long rand = (long) (r.nextDouble() * range);
-
-	          for (String _id : ipidSet) {
-	            if (_id != null && !_id.isEmpty()) {
-	              InputStream[] xmlArrayIO = new InputStream[3];
-	              xmlArrayIO = new ExportUtil().exportProfileXMLArrayZip(_id, profileService);
-	            }
-	          }
+//	          long range = 1234567L;
+//	          Random r = new Random();
+//	          Long rand = (long) (r.nextDouble() * range);
+//
+//	          for (String _id : ipidSet) {
+//	            if (_id != null && !_id.isEmpty()) {
+//	              InputStream[] xmlArrayIO = new InputStream[3];
+//	              xmlArrayIO = new ExportUtil().exportProfileXMLArrayZip(_id, profileService);
+//	            }
+//	          }
 
 	          testPlanIO = new ExportUtil().exportResourceBundleAsZip(tp,
 	              testStoryConfigurationService, profileService);
