@@ -10,4 +10,11 @@ public class TestStepXMLParams extends TestStepParams {
   public void setTestCaseName(String testCaseName) {
     this.testCaseName = testCaseName;
   }
+
+@Override
+public String toString() {
+	return "TestStepXMLParams [testCaseName=" + testCaseName + "]";
+}
+  
+  
 }

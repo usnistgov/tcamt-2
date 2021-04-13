@@ -225,6 +225,7 @@ public class GenerationUtil {
 
 				if (segmentList != null) {
 					for (SegmentInstanceData segment : segmentList) {
+						System.out.println(params);
 						String[] iPathList = segment.getiPath().split("\\.");
 						if (iPathList.length == 1) {
 							Element segmentSTDElm = stdXMLDoc
