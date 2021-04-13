@@ -2492,7 +2492,7 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
                 node.testDataCategorizationListData.splice(i, 1);
             }
         }else if(action === 'add') {
-            node.testDataCategorizationListData.push(value);
+            if(!node.testDataCategorizationListData.includes(value)) node.testDataCategorizationListData.push(value);
         }
 
         var cate = $rootScope.selectedTestStep.testDataCategorizationMap[$scope.replaceDot2Dash(node.iPath)];
