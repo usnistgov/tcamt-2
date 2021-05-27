@@ -854,7 +854,7 @@ public class GenerationUtil {
 		Element orderIndifferentElement = xmlDoc.createElement("OrderIndifferent");
 		Element messageElement = xmlDoc.createElement("Message");
 		Element byIDElement = xmlDoc.createElement("ByID");
-		byIDElement.setAttribute("ID", params.getConformanceProfileId());
+		byIDElement.setAttribute("ID", params.getIntegrationProfileId() + "_" + params.getConformanceProfileId());
 
 		rootElement.appendChild(constraintsElement);
 		rootElement.appendChild(orderIndifferentElement);
