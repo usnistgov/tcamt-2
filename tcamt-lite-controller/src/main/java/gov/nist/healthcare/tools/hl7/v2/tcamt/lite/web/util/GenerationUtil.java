@@ -91,11 +91,11 @@ public class GenerationUtil {
 	final String NEW_FORMAT = "MM/dd/yyyy";
 
 	public List<SegmentInstanceData> popSegmentList(TestStepParams params, ProfileData profileData) throws Exception{
-		System.out.println(params.getEr7Message());
-		System.out.println(params.getIntegrationProfileId());
-		System.out.println(params.getConformanceProfileId());
-		
-		System.out.println(profileData.getIntegrationProfile().getId());
+//		System.out.println(params.getEr7Message());
+//		System.out.println(params.getIntegrationProfileId());
+//		System.out.println(params.getConformanceProfileId());
+//		
+//		System.out.println(profileData.getIntegrationProfile().getId());
 		this.segmentsInfoList = new ArrayList<SegmentInfo>();
 		this.repeatedNum = 1;
 		this.currentPosition = 0;
@@ -147,12 +147,14 @@ public class GenerationUtil {
 
 					}
 
-//          for(SegmentInfo si:segmentsInfoList){
-//            System.out.println(si);
-//          }
+          for(SegmentInfo si:segmentsInfoList){
+        	  if(si.isAnchor() && !si.getUsage().equals(Usage.R)) {
+        		  si.setAnchor(false);
+        		  segmentsInfoList.get(segmentsInfoList.indexOf(si) + 1).setAnchor(true);
+        	  }
+          }
 
 					currentPosition = 0;
-					System.out.println(segmentInstanceDataList.size());
 					for (SegmentInstanceData sid : segmentInstanceDataList) {
 						SegmentInfo sInfo = this.findSegmentInfo(sid.getSegmentName(), null);
 						if (sInfo != null) {
@@ -170,7 +172,6 @@ public class GenerationUtil {
 //              System.out.println(currentPosition);
 						}
 					}
-					System.out.println(segmentInstanceDataList.size());
 					return segmentInstanceDataList;
 				}
 			}

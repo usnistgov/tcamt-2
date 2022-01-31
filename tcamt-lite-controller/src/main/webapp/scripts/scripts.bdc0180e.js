@@ -9967,6 +9967,7 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 
     $scope.getAllValue=function(obj){
         var table=[];
+        if(obj && Object && Object.keys(obj))
         angular.forEach(Object.keys(obj),function(prop){
             table=_.union(table,obj[prop]);
 

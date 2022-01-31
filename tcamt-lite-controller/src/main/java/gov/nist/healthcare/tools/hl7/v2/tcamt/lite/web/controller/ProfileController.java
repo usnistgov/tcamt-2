@@ -1,5 +1,6 @@
 package gov.nist.healthcare.tools.hl7.v2.tcamt.lite.web.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -44,12 +45,9 @@ import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.web.exception.UserAccountNotF
 @RequestMapping("/profiles")
 public class ProfileController extends CommonController {
 
-  private static String profileXSDurl =
-      "https://raw.githubusercontent.com/Jungyubw/NIST_healthcare_hl7_v2_profile_schema/master/Schema/NIST%20Validation%20Schema/Profile.xsd";
-  private static String valueSetXSDurl =
-      "https://raw.githubusercontent.com/Jungyubw/NIST_healthcare_hl7_v2_profile_schema/master/Schema/NIST%20Validation%20Schema/ValueSets.xsd";
-  private static String constraintXSDurl =
-      "https://raw.githubusercontent.com/Jungyubw/NIST_healthcare_hl7_v2_profile_schema/master/Schema/NIST%20Validation%20Schema/ConformanceContext.xsd";
+  private static String profileXSDurl = "xsd" + File.separator + "Profile.xsd";
+  private static String valueSetXSDurl = "xsd" + File.separator + "ValueSets.xsd";
+  private static String constraintXSDurl = "xsd" + File.separator + "ConformanceContext.xsd";
 
   @Autowired
   UserService userService;
@@ -143,10 +141,11 @@ public class ProfileController extends CommonController {
 
   private XSDVerificationResult verifyXMLByXSD(String xsdURL, String xml) {
     try {
-      URL schemaFile = new URL(xsdURL);
+      ClassLoader classLoader = getClass().getClassLoader();
+      URL schemaFile = classLoader.getResource(xsdURL);	
       Source xmlFile = new StreamSource(new StringReader(xml));
       SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      Schema schema = schemaFactory.newSchema(schemaFile);
+      Schema schema = schemaFactory.newSchema(new File(schemaFile.toURI()));
       Validator validator = schema.newValidator();
       validator.validate(xmlFile);
       return new XSDVerificationResult(true, null);
