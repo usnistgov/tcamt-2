@@ -877,18 +877,18 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
                                     cate.testDataCategorization == 'Presence-Configuration' ||
                                     cate.testDataCategorization == 'Presence-System Generated' ||
                                     cate.testDataCategorization == 'Presence-Test Case Proper'){
-                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be presented.');
+                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be present.');
                                 }else if(cate.testDataCategorization == 'Presence Length-Content Indifferent' ||
                                     cate.testDataCategorization == 'Presence Length-Configuration' ||
                                     cate.testDataCategorization == 'Presence Length-System Generated' ||
                                     cate.testDataCategorization == 'Presence Length-Test Case Proper'){
-                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be presented.');
+                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be present.');
                                     cate.constraints.push('Length of ' + cate.iPath + ' (' + cate.name + ') SHALL be more than '+ cate.data.length);
                                 }else if(cate.testDataCategorization == 'Value-Test Case Fixed'){
-                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be presented.');
+                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be present.');
                                     cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be '+ cate.data);
                                 }else if(cate.testDataCategorization == 'Value-Test Case Fixed List'){
-                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be presented.');
+                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be present.');
                                     cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be one of '+ cate.listData);
                                 }
 
@@ -1904,9 +1904,35 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 
                 }
             }
-            if(errorList.length > 0) return [`This trigger condition is duplicated with ${errorList.join(' , ')}`];
+            if(errorList.length > 0) {
+                if(!$scope.compareListString(orderIndifferentInfo.currentIPath, errorList)) {
+                    return [`This trigger condition is duplicated with ${errorList.join(' , ')}`];
+                } else {
+                    return [`This trigger condition is duplicated with ${errorList.join(' , ')}, so the Testdata Categorization setting associated with ${orderIndifferentInfo.currentIPath} will be replaced by the Testdata Categorization setting associated with ${$scope.compareListString(orderIndifferentInfo.currentIPath, errorList)}`];
+                }
+            }
         }
         return [];
+    }
+
+    $scope.compareListString = function(str, list) {
+        let allList = [];
+        for(const item of list) {
+            allList.push(item.replaceAll('-', '.'));
+        }
+        allList.push(str);
+        allList = allList.sort(function (a, b) {
+            if (a < b) {
+              return -1;
+            }
+            if (a > b) {
+              return 1;
+            }
+            return 0;
+          });
+
+        if(allList[0] === str) return null;
+        return allList[0]
     }
 
     $scope.findLocationTriggerValue = function(str){
@@ -2229,18 +2255,18 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
                                     cate.testDataCategorization == 'Presence-Configuration' ||
                                     cate.testDataCategorization == 'Presence-System Generated' ||
                                     cate.testDataCategorization == 'Presence-Test Case Proper'){
-                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be presented.');
+                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be present.');
                                 }else if(cate.testDataCategorization == 'Presence Length-Content Indifferent' ||
                                     cate.testDataCategorization == 'Presence Length-Configuration' ||
                                     cate.testDataCategorization == 'Presence Length-System Generated' ||
                                     cate.testDataCategorization == 'Presence Length-Test Case Proper'){
-                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be presented.');
+                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be present.');
                                     cate.constraints.push('Length of ' + cate.iPath + ' (' + cate.name + ') SHALL be more than '+ cate.data.length);
                                 }else if(cate.testDataCategorization == 'Value-Test Case Fixed'){
-                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be presented.');
+                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be present.');
                                     cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be '+ cate.data);
                                 }else if(cate.testDataCategorization == 'Value-Test Case Fixed List'){
-                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be presented.');
+                                    if(!usageCheck) cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be present.');
                                     cate.constraints.push(cate.iPath + ' (' + cate.name + ') SHALL be one of '+ cate.listData);
                                 }
 

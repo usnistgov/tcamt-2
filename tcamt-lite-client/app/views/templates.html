@@ -1,4 +1,5 @@
 <style id="antiClickjack">body{display:none !important;}</style>
+
 <script type="text/javascript">
     if (self === top) {
         var antiClickjack = document.getElementById("antiClickjack");
@@ -7,6 +8,7 @@
         top.location = self.location;
     }
 </script>
+
 <script type="text/ng-template" id="warning-dialog.html">
     <div class="modal-header">
         <h3>Your session will expire soon!</h3>
@@ -140,65 +142,6 @@
     </md-dialog>
 </script>
 
-<script type="text/ng-template" id="ImportXMLPublicProfileModal.html">
-    <md-dialog aria-label="Import Public Profile">
-        <form ng-cloak>
-            <md-toolbar>
-                <div class="md-toolbar-tools">
-                    <h2>Import Public Profile</h2>
-                    <span flex></span>
-                </div>
-            </md-toolbar>
-            <md-dialog-content>
-                <div ng-show="!needHelp" class="md-dialog-content">
-                    <div class="form-group">
-                        <div class="col-md-12">
-                            <label for="profilePublicFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose Profile XML File
-                                <div id="errorMessageForPublicProfile"></div>
-                            </label>
-                            <input id="profilePublicFile" accept=".xml" onchange="angular.element(this).scope().validateForProfileXMLFile(this.files)" type="file" name="profilePublicFile" />
-                        </div>
-                        <div class="col-md-12">
-                            <label for="valueSetPublicFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose ValueSet XML File
-                                <div id="errorMessageForValueSetPublic"></div>
-                            </label>
-                            <input id="valueSetPublicFile" accept=".xml" onchange="angular.element(this).scope().validateForValueSetXMLFile(this.files)" type="file" name="valueSetPublicFile" />
-                        </div>
-                        <div class="col-md-12">
-                            <label for="constraintsPublicFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose Constraints XML File
-                                <div id="errorMessageForConstraintsPublic"></div>
-                            </label>
-                            <input id="constraintsPublicFile" accept=".xml" onchange="angular.element(this).scope().validateForConstraintsXMLFile(this.files)" type="file" name="constraintsPublicFile" />
-                        </div>
-                    </div>
-                </div>
-                <div ng-show="needHelp" class="md-dialog-content">
-                    <div style="width: 100%" ng-bind-html="getHtml(1)"></div>
-                </div>
-            </md-dialog-content>
-            <md-dialog-actions layout="row">
-                <md-button ng-show="!needHelp" class="btn btn-default btn-sm" ng-click="showHelp()">
-                    <i class="fa fa-question fa-fw">&nbsp; </i> Show Help
-                </md-button>
-                <md-button ng-show="needHelp" class="btn btn-default btn-sm" ng-click="needHelp = false;">
-                    <i class="fa fa-arrow-left fa-fw">&nbsp; </i> Back to Import Public Profile
-                </md-button>
-                <span flex></span>
-                <md-button class="btn btn-default btn-sm" ng-click="cancel()">
-                    <i class="fa fa-times fa-fw">&nbsp; </i> Cancel
-                </md-button>
-                <md-button ng-show="!needHelp" id="importPublicProfileButton" class="btn btn-primary btn-sm" disabled ng-click="importProfileXML();">
-                    <i class="fa fa-plus fa-fw">&nbsp; </i> Import
-                </md-button>
-            </md-dialog-actions>
-        </form>
-    </md-dialog>
-
-</script>
-
 <script type="text/ng-template" id="TestPlanImportModal.html">
     <md-dialog aria-label="Import TestPlan JSON">
         <form ng-cloak>
@@ -252,11 +195,11 @@
 </script>
 
 <script type="text/ng-template" id="ImportXMLProfileModal.html">
-    <md-dialog aria-label="Import Implementation Guide (XML)">
+    <md-dialog aria-label="Import Implementation Guide (ZIP)">
         <form ng-cloak>
             <md-toolbar>
                 <div class="md-toolbar-tools">
-                    <h2>Import Implementation Guide (XML)</h2>
+                    <h2>Import Implementation Guide (ZIP)</h2>
                     <span flex></span>
                 </div>
             </md-toolbar>
@@ -264,25 +207,10 @@
                 <div ng-show="!needHelp" class="md-dialog-content">
                     <div class="form-group">
                         <div class="col-md-12">
-                            <label for="profileXMLFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose Profile XML File
-                                <div id="errorMessageForXMLProfile"></div>
+                            <label for="igXMLFile" class="custom-file-upload">
+                                <i class="fa fa-cloud-upload"></i> Choose IG Zip file
                             </label>
-                            <input id="profileXMLFile" accept=".xml" onchange="angular.element(this).scope().validateForProfileXMLFile(this.files)" type="file" name="profileXMLFile" />
-                        </div>
-                        <div class="col-md-12">
-                            <label for="valueSetXMLFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose ValueSet XML File
-                                <div id="errorMessageForValueSetXML"></div>
-                            </label>
-                            <input id="valueSetXMLFile" accept=".xml" onchange="angular.element(this).scope().validateForValueSetXMLFile(this.files)" type="file" name="valueSetXMLFile" />
-                        </div>
-                        <div class="col-md-12">
-                            <label for="constraintsXMLFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose Constraints XML File
-                                <div id="errorMessageForConstraintsXML"></div>
-                            </label>
-                            <input id="constraintsXMLFile" accept=".xml" onchange="angular.element(this).scope().validateForConstraintsXMLFile(this.files)" type="file" name="constraintsXMLFile" />
+                            <input id="igZIPFile" accept=".zip" onchange="angular.element(this).scope().validateForIGZIPFile(this.files)" type="file" name="igZIPFile" multiple/>
                         </div>
                     </div>
                 </div>
@@ -301,13 +229,56 @@
                 <md-button class="btn btn-default btn-sm" ng-click="cancel()">
                     <i class="fa fa-times fa-fw">&nbsp; </i> Cancel
                 </md-button>
-                <md-button ng-show="!needHelp" id="importProfileButton" class="btn btn-primary btn-sm" disabled ng-click="importProfileXML();">
+                <md-button ng-show="!needHelp" id="importIGZIPButton" class="btn btn-primary btn-sm" disabled ng-click="importProfileZIP();">
                     <i class="fa fa-plus fa-fw">&nbsp; </i> Import
                 </md-button>
             </md-dialog-actions>
         </form>
     </md-dialog>
 
+</script>
+
+<script type="text/ng-template" id="ImportXMLPublicProfileModal.html">
+    <md-dialog aria-label="Import Public Profile">
+        <form ng-cloak>
+            <md-toolbar>
+                <div class="md-toolbar-tools">
+                    <h2>Import Public Profile</h2>
+                    <span flex></span>
+                </div>
+            </md-toolbar>
+            <md-dialog-content>
+                <div ng-show="!needHelp" class="md-dialog-content">
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <label for="igXMLFile" class="custom-file-upload">
+                                <i class="fa fa-cloud-upload"></i> Choose IG Zip file
+                            </label>
+                            <input id="igZIPFile" accept=".zip" onchange="angular.element(this).scope().validateForIGZIPFile(this.files)" type="file" name="igZIPFile" multiple/>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="needHelp" class="md-dialog-content">
+                    <div style="width: 100%" ng-bind-html="getHtml(1)"></div>
+                </div>
+            </md-dialog-content>
+            <md-dialog-actions layout="row">
+                <md-button ng-show="!needHelp" class="btn btn-default btn-sm" ng-click="showHelp()">
+                    <i class="fa fa-question fa-fw">&nbsp; </i> Show Help
+                </md-button>
+                <md-button ng-show="needHelp" class="btn btn-default btn-sm" ng-click="needHelp = false;">
+                    <i class="fa fa-arrow-left fa-fw">&nbsp; </i> Back to Import Public Profile
+                </md-button>
+                <span flex></span>
+                <md-button class="btn btn-default btn-sm" ng-click="cancel()">
+                    <i class="fa fa-times fa-fw">&nbsp; </i> Cancel
+                </md-button>
+                <md-button ng-show="!needHelp" id="importPublicIGZIPButton" class="btn btn-primary btn-sm" disabled ng-click="importProfileZIP();">
+                    <i class="fa fa-plus fa-fw">&nbsp; </i> Import
+                </md-button>
+            </md-dialog-actions>
+        </form>
+    </md-dialog>
 </script>
 
 <script type="text/ng-template" id="ShowProfileModal.html">
@@ -389,7 +360,7 @@
         <form ng-cloak>
             <md-toolbar>
                 <div class="md-toolbar-tools">
-                    <h2>Replace XML Profile</h2>
+                    <h2>Replace Implementation Guide (ZIP)</h2>
                     <span flex></span>
                 </div>
             </md-toolbar>
@@ -397,25 +368,10 @@
                 <div ng-show="!needHelp" class="md-dialog-content">
                     <div class="form-group">
                         <div class="col-md-12">
-                            <label for="replaceProfileXMLFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose Profile XML File
-                                <div id="errorMessageForReplaceProfile"></div>
+                            <label for="igXMLFile" class="custom-file-upload">
+                                <i class="fa fa-cloud-upload"></i> Choose IG Zip file
                             </label>
-                            <input id="replaceProfileXMLFile" accept=".xml" onchange="angular.element(this).scope().validateForProfileXMLFile(this.files)" type="file" name="replaceProfileXMLFile" />
-                        </div>
-                        <div class="col-md-12">
-                            <label for="replaceValueSetXMLFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose ValueSet XML File
-                                <div id="errorMessageForReplaceValueSet"></div>
-                            </label>
-                            <input id="replaceValueSetXMLFile" accept=".xml" onchange="angular.element(this).scope().validateForValueSetXMLFile(this.files)" type="file" name="replaceValueSetXMLFile" />
-                        </div>
-                        <div class="col-md-12">
-                            <label for="replaceConstraintsXMLFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose Constraints XML File
-                                <div id="errorMessageForReplaceConstraints"></div>
-                            </label>
-                            <input id="replaceConstraintsXMLFile" accept=".xml" onchange="angular.element(this).scope().validateForConstraintsXMLFile(this.files)" type="file" name="replaceConstraintsXMLFile" />
+                            <input id="replaceProfileZIPFile" accept=".zip" onchange="angular.element(this).scope().validateForIGZIPFile(this.files)" type="file" name="replaceProfileZIPFile" multiple/>
                         </div>
                     </div>
                 </div>
@@ -434,8 +390,8 @@
                 <md-button class="btn btn-default btn-sm" ng-click="cancel()">
                     <i class="fa fa-times fa-fw">&nbsp; </i> Cancel
                 </md-button>
-                <md-button ng-show="!needHelp" id="replaceProfileButton" class="btn btn-primary btn-sm" disabled ng-click="replaceProfileXML();">
-                    <i class="fa fa-repeat fa-fw">&nbsp; </i> Replace
+                <md-button ng-show="!needHelp" id="replaceIGZIPButton" class="btn btn-primary btn-sm" disabled ng-click="replaceIGZIP();">
+                    <i class="fa fa-plus fa-fw">&nbsp; </i> Import
                 </md-button>
             </md-dialog-actions>
         </form>
@@ -448,7 +404,7 @@
         <form ng-cloak>
             <md-toolbar>
                 <div class="md-toolbar-tools">
-                    <h2>Replace Public Profile</h2>
+                    <h2>Replace Public Implementation Guide (ZIP)</h2>
                     <span flex></span>
                 </div>
             </md-toolbar>
@@ -456,25 +412,10 @@
                 <div ng-show="!needHelp" class="md-dialog-content">
                     <div class="form-group">
                         <div class="col-md-12">
-                            <label for="replacePublicProfileXMLFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose Profile XML File
-                                <div id="errorMessageForReplacePublicProfile"></div>
+                            <label for="igXMLFile" class="custom-file-upload">
+                                <i class="fa fa-cloud-upload"></i> Choose IG Zip file
                             </label>
-                            <input id="replacePublicProfileXMLFile" accept=".xml" onchange="angular.element(this).scope().validateForProfileXMLFile(this.files)" type="file" name="replacePublicProfileXMLFile" />
-                        </div>
-                        <div class="col-md-12">
-                            <label for="replacePublicValueSetXMLFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose ValueSet XML File
-                                <div id="errorMessageForReplacePublicValueSet"></div>
-                            </label>
-                            <input id="replacePublicValueSetXMLFile" accept=".xml" onchange="angular.element(this).scope().validateForValueSetXMLFile(this.files)" type="file" name="replacePublicValueSetXMLFile" />
-                        </div>
-                        <div class="col-md-12">
-                            <label for="replacePublicConstraintsXMLFile" class="custom-file-upload">
-                                <i class="fa fa-cloud-upload"></i> Choose Constraints XML File
-                                <div id="errorMessageForReplacePublicConstraints"></div>
-                            </label>
-                            <input id="replacePublicConstraintsXMLFile" accept=".xml" onchange="angular.element(this).scope().validateForConstraintsXMLFile(this.files)" type="file" name="replacePublicConstraintsXMLFile" />
+                            <input id="replacePublicProfileZIPFile" accept=".zip" onchange="angular.element(this).scope().validateForIGZIPFile(this.files)" type="file" name="replacePublicProfileZIPFile" multiple/>
                         </div>
                     </div>
                 </div>
@@ -493,8 +434,8 @@
                 <md-button class="btn btn-default btn-sm" ng-click="cancel()">
                     <i class="fa fa-times fa-fw">&nbsp; </i> Cancel
                 </md-button>
-                <md-button ng-show="!needHelp" id="replacePublicProfileButton" class="btn btn-primary btn-sm" disabled ng-click="replaceProfileXML();">
-                    <i class="fa fa-repeat fa-fw">&nbsp; </i> Replace
+                <md-button ng-show="!needHelp" id="replacePublicIGZIPButton" class="btn btn-primary btn-sm" disabled ng-click="replaceIGZIP();">
+                    <i class="fa fa-plus fa-fw">&nbsp; </i> Replace
                 </md-button>
             </md-dialog-actions>
         </form>
@@ -569,6 +510,7 @@
         </form>
     </md-dialog>
 </script>
+
 <script type="text/ng-template" id="GVTConfirm.html">
     <md-dialog aria-label="Confirmation">
         <form ng-cloak>
@@ -593,6 +535,7 @@
         </form>
     </md-dialog>
 </script>
+
 <script type="text/ng-template" id="exportGVT.html">
     <md-dialog aria-label="exportXml" style="min-width: 50%">
         <div ng-cloak>

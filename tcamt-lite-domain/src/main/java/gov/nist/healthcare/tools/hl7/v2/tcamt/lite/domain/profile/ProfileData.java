@@ -30,6 +30,10 @@ public class ProfileData implements java.io.Serializable{
   private String profileXMLFileStr;
   private String valueSetXMLFileStr;
   private String constraintsXMLFileStr;
+  
+  private String slicingXMLFileStr;
+  private String bindingXMLFileStr;
+  private String coconstraintsXMLFileStr;
 
   public String getProfileXMLFileStr() {
     return profileXMLFileStr;
@@ -110,6 +114,30 @@ public class ProfileData implements java.io.Serializable{
   public void setValueSetLibrary(ValueSetLibrary valueSetLibrary) {
     this.valueSetLibrary = valueSetLibrary;
   }
+
+public String getBindingXMLFileStr() {
+	return bindingXMLFileStr;
+}
+
+public void setBindingXMLFileStr(String bindingXMLFileStr) {
+	this.bindingXMLFileStr = bindingXMLFileStr;
+}
+
+public String getSlicingXMLFileStr() {
+	return slicingXMLFileStr;
+}
+
+public void setSlicingXMLFileStr(String slicingXMLFileStr) {
+	this.slicingXMLFileStr = slicingXMLFileStr;
+}
+
+public String getCoconstraintsXMLFileStr() {
+	return coconstraintsXMLFileStr;
+}
+
+public void setCoconstraintsXMLFileStr(String coconstraintsXMLFileStr) {
+	this.coconstraintsXMLFileStr = coconstraintsXMLFileStr;
+}
   
   
 }

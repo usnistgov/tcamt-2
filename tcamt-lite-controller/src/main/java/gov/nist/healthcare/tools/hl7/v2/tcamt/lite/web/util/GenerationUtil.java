@@ -329,8 +329,8 @@ public class GenerationUtil {
 				String sourceStr = IOUtils.toString(sourceReader);
 
 				result.setTestdataSpecification(GenerationUtil.parseXmlByXSLT(sourceStr, xsltStr));
-				result.setTestdataSpecification(
-						result.getTestdataSpecification().replace("accordion", "uib-accordion"));
+				
+				if(result.getTestdataSpecification() != null) result.setTestdataSpecification(result.getTestdataSpecification().replace("accordion", "uib-accordion"));
 			}
 		}
 

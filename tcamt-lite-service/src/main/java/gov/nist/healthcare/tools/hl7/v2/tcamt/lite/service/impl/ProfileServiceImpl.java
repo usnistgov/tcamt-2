@@ -267,6 +267,7 @@ public class ProfileServiceImpl implements ProfileService {
 
       ValueSetLibrary valueSetLibrary = new ValueSetLibrary();
       ValueSetLibraryMetaData valueSetLibraryMetaData = new ValueSetLibraryMetaData();
+      System.out.println(data.getValueSetXMLFileStr());
       Document valueSetDom = XMLManager.stringToDom(data.getValueSetXMLFileStr());
       Element valueSetLibraryElm =
           (Element) valueSetDom.getElementsByTagName("ValueSetLibrary").item(0);

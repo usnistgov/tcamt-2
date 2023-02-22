@@ -223,9 +223,12 @@ public class ExportUtil {
 					String sourceStr = IOUtils.toString(sourceReader);
 
 					String testDataSpecificationHTMLStr = XMLManager.parseXmlByXSLT(sourceStr, xsltStr);
-					packageBodyHTML = packageBodyHTML + "<h3>" + "Test Data Specification" + "</h3>"
-							+ System.getProperty("line.separator");
-					packageBodyHTML = packageBodyHTML + this.retrieveBodyContent(testDataSpecificationHTMLStr);
+					if(testDataSpecificationHTMLStr != null) {
+						packageBodyHTML = packageBodyHTML + "<h3>" + "Test Data Specification" + "</h3>"
+								+ System.getProperty("line.separator");
+						packageBodyHTML = packageBodyHTML + this.retrieveBodyContent(testDataSpecificationHTMLStr);	
+					}
+					
 				}
 
 				if (ts.getJdXSL() != null && !ts.getJdXSL().equals("")) {
@@ -881,10 +884,16 @@ public class ExportUtil {
 			if (id != null && !id.isEmpty()) {
 				ProfileData profileData = profileService.findOne(id);
 				if (profileData != null) {
-					this.genProfileAsXML(out, tp, profileData.getId(),
-							this.changeProfileId(profileData.getProfileXMLFileStr(), id));
-					this.genValueSetAsXML(out, tp, profileData.getId(), this.changeValueSetId(profileData.getValueSetXMLFileStr(), id));
-					this.genConstraintsAsXML(out, tp, profileData.getId(), this.changeConstraintId(profileData.getConstraintsXMLFileStr(), id));
+					this.genProfileAsXML(out, tp, profileData.getId(), this.changeProfileId(profileData.getProfileXMLFileStr(), id, tp.getId()));
+					this.genValueSetAsXML(out, tp, profileData.getId(), this.changeValueSetId(profileData.getValueSetXMLFileStr(), id, tp.getId()));
+					this.genConstraintsAsXML(out, tp, profileData.getId(), this.changeConstraintId(profileData.getConstraintsXMLFileStr(), id, tp.getId()));
+					
+					if(profileData.getBindingXMLFileStr() != null && !profileData.getBindingXMLFileStr().equals(""))
+						this.genBindingsAsXML(out, tp, profileData.getId(), this.changeBindingsId(profileData.getBindingXMLFileStr(), id, tp.getId()));
+					if(profileData.getCoconstraintsXMLFileStr() != null && !profileData.getCoconstraintsXMLFileStr().equals(""))
+						this.genCoconstraintsAsXML(out, tp, profileData.getId(), this.changeCoconstraintsId(profileData.getCoconstraintsXMLFileStr(), id, tp.getId()));
+					if(profileData.getSlicingXMLFileStr() != null && !profileData.getSlicingXMLFileStr().equals(""))
+						this.genSlicingAsXML(out, tp, profileData.getId(), this.changeSlicingId(profileData.getSlicingXMLFileStr(), id, tp.getId()));
 				}
 
 			}
@@ -899,28 +908,59 @@ public class ExportUtil {
 		bytes = outputStream.toByteArray();
 		return new ByteArrayInputStream(bytes);
 	}
-
-	private String changeConstraintId(String constraintXMLFileStr, String id) throws Exception {
-		Document doc = XMLManager.stringToDom(constraintXMLFileStr);
-		Element elm = (Element) (doc.getElementsByTagName("ConformanceContext").item(0));
-		if (elm != null)
-			elm.setAttribute("UUID", id + "_C");
+	
+	private String changeSlicingId(String slicingXMLFileStr, String id, String tp_id) throws Exception {
+		Document doc = XMLManager.stringToDom(slicingXMLFileStr);
+		Element elm = (Element) (doc.getElementsByTagName("ProfileSlicing").item(0));
+		if (elm != null) {
+			elm.setAttribute("ID", tp_id + "_" + id + "_S");
+		}
 		return XMLManager.docToString(doc);
 	}
 	
-	private String changeValueSetId(String valueSetXMLFileStr, String id) throws Exception {
-		Document doc = XMLManager.stringToDom(valueSetXMLFileStr);
-		Element elm = (Element) (doc.getElementsByTagName("ValueSetLibrary").item(0));
-		if (elm != null)
-			elm.setAttribute("ValueSetLibraryIdentifier", id + "_VS");
+	private String changeCoconstraintsId(String coconstraintsXMLFileStr, String id, String tp_id) throws Exception {
+		Document doc = XMLManager.stringToDom(coconstraintsXMLFileStr);
+		Element elm = (Element) (doc.getElementsByTagName("CoConstraintContext").item(0));
+		if (elm != null) {
+			elm.setAttribute("ID", tp_id + "_" + id + "_CC");
+		}
+		return XMLManager.docToString(doc);
+	}
+	
+	private String changeBindingsId(String bindingXMLFileStr, String id, String tp_id) throws Exception {
+		Document doc = XMLManager.stringToDom(bindingXMLFileStr);
+		Element elm = (Element) (doc.getElementsByTagName("ValueSetBindingsContext").item(0));
+		if (elm != null) {
+			elm.setAttribute("ID", tp_id + "_" + id + "_B");
+		}
 		return XMLManager.docToString(doc);
 	}
 
-	private String changeProfileId(String profileXMLFileStr, String id) throws Exception {
+	private String changeConstraintId(String constraintXMLFileStr, String id, String tp_id) throws Exception {
+		Document doc = XMLManager.stringToDom(constraintXMLFileStr);
+		Element elm = (Element) (doc.getElementsByTagName("ConformanceContext").item(0));
+		if (elm != null) {
+			elm.setAttribute("UUID", tp_id + "_" + id + "_C");
+			elm.setAttribute("ID", tp_id + "_" + id + "_C");
+		}
+		return XMLManager.docToString(doc);
+	}
+	
+	private String changeValueSetId(String valueSetXMLFileStr, String id, String tp_id) throws Exception {
+		Document doc = XMLManager.stringToDom(valueSetXMLFileStr);
+		Element elm = (Element) (doc.getElementsByTagName("ValueSetLibrary").item(0));
+		if (elm != null) {
+			elm.setAttribute("ValueSetLibraryIdentifier", tp_id + "_" + id + "_VS");
+			elm.setAttribute("ID", tp_id + "_" + id + "_VS");
+		}
+		return XMLManager.docToString(doc);
+	}
+
+	private String changeProfileId(String profileXMLFileStr, String id, String tp_id) throws Exception {
 		Document doc = XMLManager.stringToDom(profileXMLFileStr);
 		Element elm = (Element) (doc.getElementsByTagName("ConformanceProfile").item(0));
 		if (elm != null)
-			elm.setAttribute("ID", id);
+			elm.setAttribute("ID", tp_id + "_" + id);
 
 		Element messagesElm = (Element) (doc.getElementsByTagName("Messages").item(0));
 		NodeList messageNodes = messagesElm.getElementsByTagName("Message");
@@ -928,7 +968,7 @@ public class ExportUtil {
 		for (int i = 0; i < messageNodes.getLength(); i++) {
 			Element mElm = (Element) messageNodes.item(i);
 			if (mElm != null)
-				mElm.setAttribute("ID", id + "_" + mElm.getAttribute("ID"));
+				mElm.setAttribute("ID", tp_id + "_" + id + "_" + mElm.getAttribute("ID"));
 		}
 
 		return XMLManager.docToString(doc);
@@ -975,6 +1015,48 @@ public class ExportUtil {
 		byte[] buf = new byte[1024];
 		out.putNextEntry(new ZipEntry("Global" + File.separator + "Tables" + File.separator + id + "_ValueSets.xml"));
 		InputStream profileIn = IOUtils.toInputStream(valueSetXMLFileStr);
+		int lenTestPlanSummary;
+		while ((lenTestPlanSummary = profileIn.read(buf)) > 0) {
+			out.write(buf, 0, lenTestPlanSummary);
+		}
+		out.closeEntry();
+		profileIn.close();
+	}
+	
+	private void genBindingsAsXML(ZipOutputStream out, TestPlan tp, String id, String bindingXMLFileStr)
+			throws IOException {
+		byte[] buf = new byte[1024];
+		out.putNextEntry(
+				new ZipEntry("Global" + File.separator + "Bindings" + File.separator + id + "_Bindings.xml"));
+		InputStream profileIn = IOUtils.toInputStream(bindingXMLFileStr);
+		int lenTestPlanSummary;
+		while ((lenTestPlanSummary = profileIn.read(buf)) > 0) {
+			out.write(buf, 0, lenTestPlanSummary);
+		}
+		out.closeEntry();
+		profileIn.close();
+	}
+	
+	private void genCoconstraintsAsXML(ZipOutputStream out, TestPlan tp, String id, String coconstraintsXMLFileStr)
+			throws IOException {
+		byte[] buf = new byte[1024];
+		out.putNextEntry(
+				new ZipEntry("Global" + File.separator + "CoConstraints" + File.separator + id + "_CoConstraints.xml"));
+		InputStream profileIn = IOUtils.toInputStream(coconstraintsXMLFileStr);
+		int lenTestPlanSummary;
+		while ((lenTestPlanSummary = profileIn.read(buf)) > 0) {
+			out.write(buf, 0, lenTestPlanSummary);
+		}
+		out.closeEntry();
+		profileIn.close();
+	}
+	
+	private void genSlicingAsXML(ZipOutputStream out, TestPlan tp, String id, String slicingXMLFileStr)
+			throws IOException {
+		byte[] buf = new byte[1024];
+		out.putNextEntry(
+				new ZipEntry("Global" + File.separator + "Slicings" + File.separator + id + "_Slicing.xml"));
+		InputStream profileIn = IOUtils.toInputStream(slicingXMLFileStr);
 		int lenTestPlanSummary;
 		while ((lenTestPlanSummary = profileIn.read(buf)) > 0) {
 			out.write(buf, 0, lenTestPlanSummary);
@@ -1273,14 +1355,17 @@ public class ExportUtil {
 			String xsltStr = IOUtils.toString(xsltReader);
 			String sourceStr = IOUtils.toString(sourceReader);
 			String messageContentHTML = XMLManager.parseXmlByXSLT(sourceStr, xsltStr);
-			InputStream inTP = null;
-			inTP = IOUtils.toInputStream(messageContentHTML);
-			int lenTP;
-			while ((lenTP = inTP.read(buf)) > 0) {
-				out.write(buf, 0, lenTP);
+			if(messageContentHTML != null) {
+				InputStream inTP = null;
+				inTP = IOUtils.toInputStream(messageContentHTML);
+				int lenTP;
+				while ((lenTP = inTP.read(buf)) > 0) {
+					out.write(buf, 0, lenTP);
+				}
+				out.closeEntry();
+				inTP.close();				
 			}
-			out.closeEntry();
-			inTP.close();
+
 		}
 	}
 
@@ -1388,9 +1473,18 @@ public class ExportUtil {
 
 
 			JSONObject hl7v2Obj = new JSONObject();
-			hl7v2Obj.put("messageId", ts.getIntegrationProfileId() + "_" + ts.getConformanceProfileId());
-			hl7v2Obj.put("constraintId", ts.getIntegrationProfileId() + "_C");
-			hl7v2Obj.put("valueSetLibraryId", ts.getIntegrationProfileId() + "_VS");
+			hl7v2Obj.put("messageId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_" + ts.getConformanceProfileId());
+			hl7v2Obj.put("constraintId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_C");
+			hl7v2Obj.put("valueSetLibraryId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_VS");
+			
+			ProfileData profileData = profileService.findOne(ts.getIntegrationProfileId());
+			if(profileData.getBindingXMLFileStr() != null && !profileData.getBindingXMLFileStr().equals(""))
+				hl7v2Obj.put("bindingId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_B");
+			if(profileData.getCoconstraintsXMLFileStr() != null && !profileData.getCoconstraintsXMLFileStr().equals(""))
+				hl7v2Obj.put("coConstraintsId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_CC");
+			if(profileData.getSlicingXMLFileStr() != null && !profileData.getSlicingXMLFileStr().equals(""))
+				hl7v2Obj.put("slicingId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_S");
+			
 			obj.put("hl7v2", hl7v2Obj);
 		}
 
