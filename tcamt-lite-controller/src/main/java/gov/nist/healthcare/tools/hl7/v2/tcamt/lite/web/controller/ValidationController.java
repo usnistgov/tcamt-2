@@ -69,7 +69,7 @@ public class ValidationController {
       params.setTestDataCategorizationMap(validationContainer.getTs().getTestDataCategorizationMap());
       params.setOrderIndifferentInfoMap(validationContainer.getTs().getOrderIndifferentInfoMap());
       params.setFieldOrderIndifferentInfoMap(validationContainer.getTs().getFieldOrderIndifferentInfoMap());
-      ConstraintXMLOutPut constraintXMLOutPut = new GenerationUtil().getConstraintsXML(params, profileService.findOne(params.getIntegrationProfileId()));
+      ConstraintXMLOutPut constraintXMLOutPut = new GenerationUtil().getConstraintsXML(null, params, profileService.findOne(params.getIntegrationProfileId()));
       String testStepConstraintXML = constraintXMLOutPut.getXmlStr();
       
       System.out.println(message);

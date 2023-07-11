@@ -68,7 +68,7 @@ public class TestStepController extends CommonController {
 
   @RequestMapping(value = "/getConstraintsXML", method = RequestMethod.POST)
   public ConstraintXMLOutPut getConstraintsXML(@RequestBody TestStepSupplementsParams params) throws Exception {
-    return new GenerationUtil().getConstraintsXML(params,
+    return new GenerationUtil().getConstraintsXML(null,params,
         profileService.findOne(params.getIntegrationProfileId()));
   }
   

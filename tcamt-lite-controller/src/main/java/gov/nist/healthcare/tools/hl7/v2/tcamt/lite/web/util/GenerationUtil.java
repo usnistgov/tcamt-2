@@ -830,7 +830,7 @@ public class GenerationUtil {
 
 	}
 
-	public ConstraintXMLOutPut getConstraintsXML(TestStepSupplementsParams params, ProfileData profileData)
+	public ConstraintXMLOutPut getConstraintsXML(String tp_Id, TestStepSupplementsParams params, ProfileData profileData)
 			throws Exception {
 		ConstraintXMLOutPut constraintXMLOutPut = new ConstraintXMLOutPut();
 		String rootName = "ConformanceContext";
@@ -855,7 +855,12 @@ public class GenerationUtil {
 		Element orderIndifferentElement = xmlDoc.createElement("OrderIndifferent");
 		Element messageElement = xmlDoc.createElement("Message");
 		Element byIDElement = xmlDoc.createElement("ByID");
-		byIDElement.setAttribute("ID", params.getIntegrationProfileId() + "_" + params.getConformanceProfileId());
+		if(tp_Id == null) {
+			byIDElement.setAttribute("ID", params.getIntegrationProfileId() + "_" + params.getConformanceProfileId());
+		} else {
+			byIDElement.setAttribute("ID", tp_Id + "_" + params.getIntegrationProfileId() + "_" + params.getConformanceProfileId());	
+		}
+		
 
 		rootElement.appendChild(constraintsElement);
 		rootElement.appendChild(orderIndifferentElement);

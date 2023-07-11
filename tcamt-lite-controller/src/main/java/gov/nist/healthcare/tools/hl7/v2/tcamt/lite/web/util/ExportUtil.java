@@ -1229,7 +1229,7 @@ public class ExportUtil {
 			params.setFieldOrderIndifferentInfoMap(ts.getFieldOrderIndifferentInfoMap());
 			params.setOrderIndifferentInfoMap(ts.getOrderIndifferentInfoMap());
 
-			ConstraintXMLOutPut constraintXMLOutPut = new GenerationUtil().getConstraintsXML(params,
+			ConstraintXMLOutPut constraintXMLOutPut = new GenerationUtil().getConstraintsXML(tp.getId(), params,
 					profileService.findOne(params.getIntegrationProfileId()));
 			if (constraintXMLOutPut != null && constraintXMLOutPut.getXmlStr() != null)
 				this.generateConstraintsXML(out, constraintXMLOutPut.getXmlStr(), stepPath);

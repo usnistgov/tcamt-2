@@ -170,9 +170,9 @@ public class ProfileController extends CommonController {
 				p.setConstraintsXMLFileStr(s.toString());
 			} else if (zipEntry.getName().equals("ValueSets.xml")) {
 				p.setValueSetXMLFileStr(s.toString());
-			} else if (zipEntry.getName().equals("Slicing.xml")) {
+			} else if (zipEntry.getName().equals("Slicings.xml")) {
 				p.setSlicingXMLFileStr(s.toString());
-			} else if (zipEntry.getName().equals("Bindings.xml")) {
+			} else if (zipEntry.getName().equals("ValueSetBindings.xml")) {
 				p.setBindingXMLFileStr(s.toString());
 			} else if (zipEntry.getName().equals("CoConstraints.xml")) {
 				p.setCoconstraintsXMLFileStr(s.toString());
