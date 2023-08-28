@@ -2148,8 +2148,8 @@ public class GenerationUtil {
 															for (int l = 0; l < componentDT.getChildren().size(); l++) {
 																Component sc = componentDT.getChildren().get(l);
 
-																if (!this.isHideForMessageContentByUsage(segment, sc,
-																		componentDT, "subComponent",
+																if (!this.isHideForMessageContentByUsage2(segment, sc,
+																		fieldDT, componentDT, "subComponent",
 																		segmentInstanceData.getPositionPath() + "."
 																				+ (i + 1) + "." + (k + 1) + "."
 																				+ (l + 1),
@@ -2260,7 +2260,7 @@ public class GenerationUtil {
 			return false;
 
 		if (field.getUsage().equals(Usage.C)) {
-			Predicate p = this.findPredicate(cp.getConformanceProfileMetaData().getId(), segment, null, positionPath,
+			Predicate p = this.findPredicate(cp.getConformanceProfileMetaData().getId(), segment, null, null, positionPath,
 					"field", profileData);
 
 			if (p != null) {
@@ -2291,7 +2291,38 @@ public class GenerationUtil {
 			return false;
 
 		if (component.getUsage().equals(Usage.C)) {
-			Predicate p = this.findPredicate(cp.getConformanceProfileMetaData().getId(), segment, dt, positionPath,
+			Predicate p = this.findPredicate(cp.getConformanceProfileMetaData().getId(), segment, dt, null, positionPath,
+					type, profileData);
+
+			if (p != null) {
+				if (p.getTrueUsage().equals(Usage.R))
+					return false;
+				if (p.getTrueUsage().equals(Usage.RE))
+					return false;
+				if (p.getFalseUsage().equals(Usage.R))
+					return false;
+				if (p.getFalseUsage().equals(Usage.RE))
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean isHideForMessageContentByUsage2(Segment segment, Component component, Datatype dt1, Datatype dt2, String type,
+			String positionPath, ConformanceProfile cp, ProfileData profileData) {
+		if (component.isHide())
+			return true;
+		
+		if (component.isShow())
+			return false;
+
+		if (component.getUsage().equals(Usage.R))
+			return false;
+		if (component.getUsage().equals(Usage.RE))
+			return false;
+
+		if (component.getUsage().equals(Usage.C)) {
+			Predicate p = this.findPredicate(cp.getConformanceProfileMetaData().getId(), segment, dt1, dt2, positionPath,
 					type, profileData);
 
 			if (p != null) {
@@ -2629,7 +2660,7 @@ public class GenerationUtil {
 				}
 
 				if (f.getUsage().equals(Usage.C))
-					fieldNode.setPredicate(this.findPredicate(params.getConformanceProfileId(), s, null,
+					fieldNode.setPredicate(this.findPredicate(params.getConformanceProfileId(), s, null, null,
 							fieldNode.getPositionPath(), "field", profileData));
 
 				if (params.getTestDataCategorizationMap() != null) {
@@ -2670,7 +2701,7 @@ public class GenerationUtil {
 						}
 
 						if (c.getUsage().equals(Usage.C))
-							componentNode.setPredicate(this.findPredicate(params.getConformanceProfileId(), s, fieldDt,
+							componentNode.setPredicate(this.findPredicate(params.getConformanceProfileId(), s, fieldDt, null,
 									componentNode.getPositionPath(), "component", profileData));
 
 						if (params.getTestDataCategorizationMap() != null) {
@@ -2715,7 +2746,7 @@ public class GenerationUtil {
 
 								if (sc.getUsage().equals(Usage.C))
 									subComponentNode.setPredicate(
-											this.findPredicate(params.getConformanceProfileId(), s, componentDt,
+											this.findPredicate(params.getConformanceProfileId(), s, fieldDt, componentDt,
 													subComponentNode.getPositionPath(), "subComponent", profileData));
 
 								if (params.getTestDataCategorizationMap() != null) {
@@ -2751,7 +2782,7 @@ public class GenerationUtil {
 		return null;
 	}
 
-	private Predicate findPredicate(String messageId, Segment segment, Datatype datatype, String positionPath,
+	private Predicate findPredicate(String messageId, Segment segment, Datatype datatype1, Datatype datatype2, String positionPath,
 			String type, ProfileData profileData) {
 		if (type != null && positionPath != null && profileData != null
 				&& profileData.getIntegrationProfile() != null) {
@@ -2792,16 +2823,31 @@ public class GenerationUtil {
 				}
 			}
 
-			if (datatype != null && profileData.getConformanceContext() != null
+			if (datatype1 != null && profileData.getConformanceContext() != null
 					&& profileData.getConformanceContext().getDatatypePredicates() != null) {
 				for (Predicate p : profileData.getConformanceContext().getDatatypePredicates()) {
-					if (p.getById() != null && p.getById().equals(datatype.getId())) {
+					if (p.getById() != null && p.getById().equals(datatype1.getId())) {
 						if (comparePositionPath(positionPath, p.getTarget(), type, "d"))
 							return p;
 					}
 
-					if (p.getByName() != null && p.getByName().equals(datatype.getName())) {
+					if (p.getByName() != null && p.getByName().equals(datatype1.getName())) {
 						if (comparePositionPath(positionPath, p.getTarget(), type, "d"))
+							return p;
+					}
+				}
+			}
+			
+			if (datatype2 != null && profileData.getConformanceContext() != null
+					&& profileData.getConformanceContext().getDatatypePredicates() != null) {
+				for (Predicate p : profileData.getConformanceContext().getDatatypePredicates()) {
+					if (p.getById() != null && p.getById().equals(datatype2.getId())) {
+						if (comparePositionPath(positionPath, p.getTarget(), type, "sd"))
+							return p;
+					}
+
+					if (p.getByName() != null && p.getByName().equals(datatype2.getName())) {
+						if (comparePositionPath(positionPath, p.getTarget(), type, "sd"))
 							return p;
 					}
 				}
@@ -2877,6 +2923,14 @@ public class GenerationUtil {
 				if (!componentPositionPredicate.startsWith(componentPositionTarget + "["))
 					return false;
 				if (!subComponentPositionPredicate.startsWith(subComponentPositionTarget + "["))
+					return false;
+			} else
+				return false;
+		} else if (predicateLevel.equals("sd")) {
+			if (targetType.equals("subComponent")) {
+				String componentPositionPredicate = predicatePositionSplits[predicatePositionSplits.length - 1];
+				String componentPositionTarget = targetPositionSplits[targetPositionSplits.length - 1];
+				if (!componentPositionPredicate.startsWith(componentPositionTarget + "["))
 					return false;
 			} else
 				return false;
