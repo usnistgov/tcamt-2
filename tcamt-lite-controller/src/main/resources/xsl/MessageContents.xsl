@@ -2269,7 +2269,17 @@
 		<xsl:param name="ind"/>
 		<xsl:param name="vertical-orientation" as="xs:boolean"/>
 		<!-- use the tabname to convert into a valid javascript variable name that is used to track open and close of the accordions -->
-		<xsl:variable name="isOpenVar" select="concat('xsl', replace($tabname, '[ \\-]', ''))"/>
+<!-- 		<xsl:variable name="isOpenVar" select="concat('xsl', replace($tabname, '[-]', ''))"/>
+ -->		
+<!--  <xsl:variable name="isOpenVar" select="concat('xsl', translate($tabname, '-', ''))"/>
+ --> <xsl:variable name="isOpenVar">
+  <xsl:analyze-string select="$tabname" regex="(\w+) - (\d+)">
+    <xsl:matching-substring>
+      <xsl:value-of select="concat('xsl', regex-group(1), regex-group(2))"/>
+    </xsl:matching-substring>
+  </xsl:analyze-string>
+</xsl:variable>
+		
 		<xsl:choose>
 			<xsl:when test="$output = 'ng-tab-html'">
 				<xsl:value-of select="util:tag(concat(util:IfThenElse($vertical-orientation,                   concat('accordion-group class=&quot;panel-info&quot; type=&quot;pills&quot; style=&quot;margin-top:0;border: 1px ridge  #C6DEFF;&quot; is-open=&quot;', $isOpenVar, '&quot; '), 'tab'),                   util:IfThenElse($vertical-orientation, '', concat(' heading=&quot;', $tabname, '&quot; heading2=&quot;', $additionalval, '&quot; ')), ' vertical=&quot;', $vertical-orientation, '&quot;'), '')"/>
