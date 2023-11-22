@@ -281,6 +281,7 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
                                 deferred: deferred
                             };
                         $rootScope.requests401.push(req);
+                        $rootScope.authenticated = false;
                         $rootScope.$broadcast('event:loginRequired');
                         return  $q.when(response);
                     }
@@ -460,6 +461,7 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
             $http.get('api/accounts/cuser').success(function (data) {
                 console.log("setCurrentUser=" + data);
                 userInfoService.setCurrentUser(data);
+                $rootScope.authenticated = true;
                 $rootScope.$broadcast('event:loginConfirmed');
             });
         });
@@ -501,6 +503,7 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
     });
 
     $rootScope.loadUserFromCookie = function () {
+        console.log("Loading from Cookies");
         if (userInfoService.hasCookieInfo() === true) {
             //console.log("found cookie!")
             userInfoService.loadFromCookie();

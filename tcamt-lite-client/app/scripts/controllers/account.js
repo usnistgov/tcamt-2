@@ -52,6 +52,8 @@ angular.module('tcl')
                 //console.log("Account removed");
                 //TODO: Add a real check?
                 userInfoService.setCurrentUser(null);
+                $rootScope.authenticated = false;
+
                 $scope.$emit('event:logoutRequest');
                 $location.url('/home');
             });

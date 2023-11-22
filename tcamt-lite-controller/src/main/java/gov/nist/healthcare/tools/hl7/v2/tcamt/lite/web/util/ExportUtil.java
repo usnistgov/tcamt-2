@@ -1216,8 +1216,11 @@ public class ExportUtil {
 		this.generateTestStepJsonRB(out, ts, tp, stepPath, index, profileService);
 
 		if (ts.getConformanceProfileId() != null && !ts.getConformanceProfileId().equals("")) {
-			this.generateEr7Message(out, ts.getEr7Message(), stepPath);
-
+			if(ts.getEr7Message() == null) {
+				ts.setEr7Message("");
+			} 
+			this.generateEr7Message(out, ts.getEr7Message() , stepPath);
+		
 			TestStepSupplementsParams params = new TestStepSupplementsParams();
 			params.setConformanceProfileId(ts.getConformanceProfileId());
 			params.setEr7Message(ts.getEr7Message());

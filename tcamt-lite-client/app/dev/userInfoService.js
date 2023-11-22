@@ -7,7 +7,7 @@ angular.module('tcl').factory('userInfo', ['$resource',
 ]);
 
 angular.module('tcl').factory('userLoaderService', ['userInfo', '$q',
-    function (userInfo, $q) {
+    function (userInfo, $q, $rootScope) {
         var load = function() {
             var delay = $q.defer();
             userInfo.get({},
@@ -134,6 +134,7 @@ angular.module('tcl').factory('userInfoService', ['$cookieStore', 'userLoaderSer
         };
 
         var setCurrentUser = function(newUser) {
+            console.log("setting user");
             currentUser = newUser;
             //console.log("NewUser=", newUser);
             if ( angular.isObject(currentUser) ) {

@@ -2426,17 +2426,52 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
     });
 
     //configure $http to show a login dialog whenever a 401 unauthorized response arrives
+//     $httpProvider.interceptors.push(function ($rootScope, $q) {
+//         return {
+//             response: function (response) {
+//                 return response || $q.when(response);
+//             },
+//             responseError: function (response) {
+//                 if (response.status === 401) {
+//                     //We catch everything but this one. So public users are not bothered
+//                     //with a login windows when browsing home.
+//                     if (response.config.url !== 'api/accounts/cuser') {
+//                         //We don't intercept this request
+//                         if (response.config.url !== 'api/accounts/login') {
+//                             var deferred = $q.defer(),
+//                                 req = {
+//                                     config: response.config,
+//                                     deferred: deferred
+//                                 };
+//                             $rootScope.requests401.push(req);
+//                         }
+//                         $rootScope.$broadcast('event:loginRequired');
+// //                        return deferred.promise;
+
+//                         return  $q.when(response);
+//                     }
+//                 }
+//                 return $q.reject(response);
+//             }
+//         };
+//     });
+
     $httpProvider.interceptors.push(function ($rootScope, $q) {
         return {
             response: function (response) {
+                if (response.config.url === 'api/accounts/cuser' && response.status === 200) {
+                    // Assuming 'authenticated' is a property in $rootScope
+                    $rootScope.currentUser = angular.fromJson(response.data);
+                    $rootScope.authenticated = true;
+
+                    console.log("updated user ");
+                    console.log(response);
+                }
                 return response || $q.when(response);
             },
             responseError: function (response) {
                 if (response.status === 401) {
-                    //We catch everything but this one. So public users are not bothered
-                    //with a login windows when browsing home.
                     if (response.config.url !== 'api/accounts/cuser') {
-                        //We don't intercept this request
                         if (response.config.url !== 'api/accounts/login') {
                             var deferred = $q.defer(),
                                 req = {
@@ -2446,15 +2481,17 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
                             $rootScope.requests401.push(req);
                         }
                         $rootScope.$broadcast('event:loginRequired');
-//                        return deferred.promise;
-
-                        return  $q.when(response);
+                        return $q.when(response);
                     }
                 }
                 return $q.reject(response);
             }
         };
     });
+
+
+
+
 
     //intercepts ALL angular ajax http calls
     $httpProvider.interceptors.push(function ($q) {
@@ -2506,13 +2543,18 @@ app.config([
         $httpProvider.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
     }
 ]);
-app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo, StorageService, $templateCache, $window, notifications, $q) {
+app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, userLoaderService,  userInfoService, $http, AppInfo, StorageService, $templateCache, $window, notifications, $q) {
     $rootScope.appInfo = {};
-    $rootScope.froalaDocLink = "https://www.froala.com/wysiwyg-editor/examples";
+    userInfoService.loadFromServer();
 
+    $rootScope.froalaDocLink = "https://www.froala.com/wysiwyg-editor/examples";
+    $rootScope.authenticated = userInfoService.isAuthenticated();
+    $rootScope.currentUser = {fullName: 'Guest'};
+    $rootScope.loginDialog = null;
     //Check if the login dialog is already displayed.
     $rootScope.loginDialogShown = false;
     $rootScope.subActivePath = null;
+    console.log($rootScope.authenticated);
 
     // load app info
     AppInfo.get().then(function (appInfo) {
@@ -2551,6 +2593,10 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
         httpHeaders.common['appVersion'] = appInfo.version;
         var prevVersion = StorageService.getAppVersion(StorageService.APP_VERSION);
         StorageService.setAppVersion(appInfo.version);
+
+        console.log("stroage Service");
+        console.log(StorageService);
+
 
         if (prevVersion == null || prevVersion !== appInfo.version) {
             $rootScope.clearAndReloadApp();
@@ -2605,8 +2651,8 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
         $rootScope.requests401 = [];
         $location.url('/home');
 
-
-        $rootScope.loadProfiles();
+        $rootScope.authenticated = true;
+        // $rootScope.loadProfiles();
 
 
     });
@@ -2627,12 +2673,16 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
                 if (result.data && result.data != null) {
                     var rs = angular.fromJson(result.data);
                     userInfoService.setCurrentUser(rs);
+                    $rootScope.authenticated = true;
                     $rootScope.$broadcast('event:loginConfirmed');
                 } else {
                     userInfoService.setCurrentUser(null);
+                    $rootScope.authenticated = false;
                 }
             }, function () {
                 userInfoService.setCurrentUser(null);
+                $rootScope.authenticated = false;
+
             });
         });
     });
@@ -2643,6 +2693,8 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
     $rootScope.$on('event:logoutRequest', function () {
         httpHeaders.common['Authorization'] = null;
         userInfoService.setCurrentUser(null);
+        $rootScope.authenticated = false;
+
         $http.get('j_spring_security_logout');
     });
 
@@ -2651,6 +2703,8 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
      */
     $rootScope.$on('event:loginCancel', function () {
         httpHeaders.common['Authorization'] = null;
+        userInfoService.setCurrentUser(null);
+        $rootScope.authenticated = false;
     });
 
     $rootScope.$on('$routeChangeStart', function (next, current) {
@@ -2666,6 +2720,7 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
         if (userInfoService.hasCookieInfo() === true) {
             //console.log("found cookie!")
             userInfoService.loadFromCookie();
+            $rootScope.authenticated = true;
             httpHeaders.common['Authorization'] = userInfoService.getHthd();
         }
         else {
@@ -2683,10 +2738,7 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
     };
 
     $rootScope.getFullName = function () {
-        if (userInfoService.isAuthenticated() === true) {
-            return userInfoService.getFullName();
-        }
-        return '';
+        return  $rootScope.currentUser.fullName;
     };
     $rootScope.clearAndReloadApp = function () {
         $rootScope.clearTemplate();
@@ -2827,6 +2879,7 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
         //console.log("USER ID=", StorageService.get('userID'));
        
         var loadFromCookie = function() {
+            console.log("Loading from Cookies");
             console.log("UserID=", StorageService.get('userID'));
             console.log("Is Admin?", StorageService.get('admin'));
 
@@ -2838,6 +2891,8 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
         };
 
         var saveToCookie = function() {
+            console.log("saving to Cookies");
+
             StorageService.set('accountID', id);
             StorageService.set('username', username);
             StorageService.set('author', author);
@@ -2847,6 +2902,8 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
         };
 
         var clearCookie = function() {
+            console.log("clearing Cookies");
+
             StorageService.remove('accountID');
             StorageService.remove('username');
             StorageService.remove('author');
@@ -2866,6 +2923,8 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
         };
 
         var hasCookieInfo =  function() {
+            console.log("has cookie info ");
+
             if ( StorageService.get('username') === '' ) {
                 return false;
             }
@@ -2952,7 +3011,7 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
                 username = '';
                 id = null;
                 fullName = '';
-                //clearCookie();
+               // clearCookie();
             }
         };
 
@@ -4240,6 +4299,8 @@ angular.module('tcl')
                 //console.log("Account removed");
                 //TODO: Add a real check?
                 userInfoService.setCurrentUser(null);
+                $rootScope.authenticated = false;
+
                 $scope.$emit('event:logoutRequest');
                 $location.url('/home');
             });
@@ -4896,10 +4957,12 @@ angular.module('tcl').controller('IssueCtrl', ['$scope', '$resource',
 
 angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$location', 'userInfoService', '$modal', 'Restangular', '$filter', 'base64', '$http', 'Idle', 'notifications', 'IdleService','StorageService',
     function ($scope, $rootScope, i18n, $location, userInfoService, $modal, Restangular, $filter, base64, $http, Idle,notifications,IdleService,StorageService) {
-        userInfoService.loadFromServer();
-        $rootScope.loginDialog = null;
+       
         $rootScope.loadProfiles = function () {
-            if (userInfoService.isAuthenticated() && !userInfoService.isPending()) {
+            console.log($rootScope.authenticated);
+            console.log("$rootScope.authenticated in profile ");
+
+            if ($rootScope.authenticated) {
                 waitingDialog.show('Loading ...', {dialogSize: 'xs', progressType: 'info'});
                 $http.get('api/profiles').then(function(response) {
                     $rootScope.profiles = angular.fromJson(response.data);
@@ -4910,8 +4973,16 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
                     waitingDialog.hide();
                 });
             }else{
+                console.log("NOT Authenticated");
             }
         };
+
+        $rootScope.$watch('authenticated', function (newValue, oldValue) {
+            if (newValue == true) {
+                // Do something when the authenticated property changes
+                $rootScope.loadProfiles();
+            }
+        });
 
         $rootScope.loadDocument = function () {
             waitingDialog.show('Loading ...', {dialogSize: 'xs', progressType: 'info'});
@@ -4932,6 +5003,9 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
             });
         };
 
+        $rootScope.isAuthenticated = function() {
+             return $rootScope.authenticated;
+         }
 
         $rootScope.compare = function (a,b) {
             if (a.position < b.position)
@@ -5023,6 +5097,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
 
         $scope.execLogout = function () {
             userInfoService.setCurrentUser(null);
+            $rootScope.authenticated = false;
             $scope.username = $scope.password = null;
             $scope.$emit('event:logoutRequest');
             $location.url('/tp');
@@ -5032,12 +5107,13 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
             $scope.$emit('event:loginCancel');
         };
 
-        $scope.isAuthenticated = function () {
-            return userInfoService.isAuthenticated();
-        };
+        // $rootScope.isAuthenticated = function () {
+        //     console.log($rootScope.authenticated);
+        //     return userInfoService.isAuthenticated();
+        // };
 
-        $scope.isPending = function () {
-            return userInfoService.isPending();
+        $rootScope.isPending = function () {
+            return !$rootScope.authenticated;
         };
 
 
@@ -5079,7 +5155,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
         };
 
         $scope.getUsername = function () {
-            if (userInfoService.isAuthenticated() === true) {
+            if ($rootScope.authenticated === true) {
                 return userInfoService.getUsername();
             }
             return '';
@@ -5133,7 +5209,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
 
         $rootScope.$on('IdleTimeout', function () {
             closeModals();
-            if ($scope.isAuthenticated()) {
+            if ($rootScope.authenticated) {
                 $rootScope.$emit('event:execLogout');
             }
             $rootScope.timedout = $modal.open({
@@ -5143,10 +5219,11 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
         });
 
         $scope.$on('Keepalive', function() {
-            if ($scope.isAuthenticated()) {
+            if ($rootScope.authenticated) {
                 IdleService.keepAlive();
             }
         });
+
 
         $rootScope.$on('event:execLogout', function () {
             $scope.execLogout();
@@ -6705,6 +6782,12 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         document.body.appendChild(form);
         form.submit();
     };
+
+    $rootScope.$watch('authenticated', function (newValue, oldValue) {
+        if (oldValue == false && newValue == true) {
+            $scope.loadTestPlans();
+        }
+    });
     $scope.loadTestPlans = function () {
         var delay = $q.defer();
         $scope.error = null;
@@ -6713,6 +6796,7 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         if (userInfoService.isAuthenticated() && !userInfoService.isPending()) {
             $http.get('api/testplans/getListTestPlanAbstract').then(function (response) {
                 $rootScope.tps = angular.fromJson(response.data);
+                $scope.loadTemplate();
                 $rootScope.isChanged=false;
                 delay.resolve(true);
             }, function (error) {

@@ -552,6 +552,12 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         document.body.appendChild(form);
         form.submit();
     };
+
+    $rootScope.$watch('authenticated', function (newValue, oldValue) {
+        if (oldValue == false && newValue == true) {
+            $scope.loadTestPlans();
+        }
+    });
     $scope.loadTestPlans = function () {
         var delay = $q.defer();
         $scope.error = null;
@@ -560,6 +566,7 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         if (userInfoService.isAuthenticated() && !userInfoService.isPending()) {
             $http.get('api/testplans/getListTestPlanAbstract').then(function (response) {
                 $rootScope.tps = angular.fromJson(response.data);
+                $scope.loadTemplate();
                 $rootScope.isChanged=false;
                 delay.resolve(true);
             }, function (error) {

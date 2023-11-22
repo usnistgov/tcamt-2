@@ -2,10 +2,12 @@
 
 angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$location', 'userInfoService', '$modal', 'Restangular', '$filter', 'base64', '$http', 'Idle', 'notifications', 'IdleService','StorageService',
     function ($scope, $rootScope, i18n, $location, userInfoService, $modal, Restangular, $filter, base64, $http, Idle,notifications,IdleService,StorageService) {
-        userInfoService.loadFromServer();
-        $rootScope.loginDialog = null;
+       
         $rootScope.loadProfiles = function () {
-            if (userInfoService.isAuthenticated() && !userInfoService.isPending()) {
+            console.log($rootScope.authenticated);
+            console.log("$rootScope.authenticated in profile ");
+
+            if ($rootScope.authenticated) {
                 waitingDialog.show('Loading ...', {dialogSize: 'xs', progressType: 'info'});
                 $http.get('api/profiles').then(function(response) {
                     $rootScope.profiles = angular.fromJson(response.data);
@@ -16,8 +18,16 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
                     waitingDialog.hide();
                 });
             }else{
+                console.log("NOT Authenticated");
             }
         };
+
+        $rootScope.$watch('authenticated', function (newValue, oldValue) {
+            if (newValue == true) {
+                // Do something when the authenticated property changes
+                $rootScope.loadProfiles();
+            }
+        });
 
         $rootScope.loadDocument = function () {
             waitingDialog.show('Loading ...', {dialogSize: 'xs', progressType: 'info'});
@@ -38,6 +48,9 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
             });
         };
 
+        $rootScope.isAuthenticated = function() {
+             return $rootScope.authenticated;
+         }
 
         $rootScope.compare = function (a,b) {
             if (a.position < b.position)
@@ -129,6 +142,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
 
         $scope.execLogout = function () {
             userInfoService.setCurrentUser(null);
+            $rootScope.authenticated = false;
             $scope.username = $scope.password = null;
             $scope.$emit('event:logoutRequest');
             $location.url('/tp');
@@ -138,12 +152,13 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
             $scope.$emit('event:loginCancel');
         };
 
-        $scope.isAuthenticated = function () {
-            return userInfoService.isAuthenticated();
-        };
+        // $rootScope.isAuthenticated = function () {
+        //     console.log($rootScope.authenticated);
+        //     return userInfoService.isAuthenticated();
+        // };
 
-        $scope.isPending = function () {
-            return userInfoService.isPending();
+        $rootScope.isPending = function () {
+            return !$rootScope.authenticated;
         };
 
 
@@ -185,7 +200,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
         };
 
         $scope.getUsername = function () {
-            if (userInfoService.isAuthenticated() === true) {
+            if ($rootScope.authenticated === true) {
                 return userInfoService.getUsername();
             }
             return '';
@@ -239,7 +254,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
 
         $rootScope.$on('IdleTimeout', function () {
             closeModals();
-            if ($scope.isAuthenticated()) {
+            if ($rootScope.authenticated) {
                 $rootScope.$emit('event:execLogout');
             }
             $rootScope.timedout = $modal.open({
@@ -249,10 +264,11 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
         });
 
         $scope.$on('Keepalive', function() {
-            if ($scope.isAuthenticated()) {
+            if ($rootScope.authenticated) {
                 IdleService.keepAlive();
             }
         });
+
 
         $rootScope.$on('event:execLogout', function () {
             $scope.execLogout();

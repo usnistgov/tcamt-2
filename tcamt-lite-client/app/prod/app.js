@@ -236,17 +236,52 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
     });
 
     //configure $http to show a login dialog whenever a 401 unauthorized response arrives
+//     $httpProvider.interceptors.push(function ($rootScope, $q) {
+//         return {
+//             response: function (response) {
+//                 return response || $q.when(response);
+//             },
+//             responseError: function (response) {
+//                 if (response.status === 401) {
+//                     //We catch everything but this one. So public users are not bothered
+//                     //with a login windows when browsing home.
+//                     if (response.config.url !== 'api/accounts/cuser') {
+//                         //We don't intercept this request
+//                         if (response.config.url !== 'api/accounts/login') {
+//                             var deferred = $q.defer(),
+//                                 req = {
+//                                     config: response.config,
+//                                     deferred: deferred
+//                                 };
+//                             $rootScope.requests401.push(req);
+//                         }
+//                         $rootScope.$broadcast('event:loginRequired');
+// //                        return deferred.promise;
+
+//                         return  $q.when(response);
+//                     }
+//                 }
+//                 return $q.reject(response);
+//             }
+//         };
+//     });
+
     $httpProvider.interceptors.push(function ($rootScope, $q) {
         return {
             response: function (response) {
+                if (response.config.url === 'api/accounts/cuser' && response.status === 200) {
+                    // Assuming 'authenticated' is a property in $rootScope
+                    $rootScope.currentUser = angular.fromJson(response.data);
+                    $rootScope.authenticated = true;
+
+                    console.log("updated user ");
+                    console.log(response);
+                }
                 return response || $q.when(response);
             },
             responseError: function (response) {
                 if (response.status === 401) {
-                    //We catch everything but this one. So public users are not bothered
-                    //with a login windows when browsing home.
                     if (response.config.url !== 'api/accounts/cuser') {
-                        //We don't intercept this request
                         if (response.config.url !== 'api/accounts/login') {
                             var deferred = $q.defer(),
                                 req = {
@@ -256,15 +291,17 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
                             $rootScope.requests401.push(req);
                         }
                         $rootScope.$broadcast('event:loginRequired');
-//                        return deferred.promise;
-
-                        return  $q.when(response);
+                        return $q.when(response);
                     }
                 }
                 return $q.reject(response);
             }
         };
     });
+
+
+
+
 
     //intercepts ALL angular ajax http calls
     $httpProvider.interceptors.push(function ($q) {
@@ -316,13 +353,18 @@ app.config([
         $httpProvider.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
     }
 ]);
-app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo, StorageService, $templateCache, $window, notifications, $q) {
+app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, userLoaderService,  userInfoService, $http, AppInfo, StorageService, $templateCache, $window, notifications, $q) {
     $rootScope.appInfo = {};
-    $rootScope.froalaDocLink = "https://www.froala.com/wysiwyg-editor/examples";
+    userInfoService.loadFromServer();
 
+    $rootScope.froalaDocLink = "https://www.froala.com/wysiwyg-editor/examples";
+    $rootScope.authenticated = userInfoService.isAuthenticated();
+    $rootScope.currentUser = {fullName: 'Guest'};
+    $rootScope.loginDialog = null;
     //Check if the login dialog is already displayed.
     $rootScope.loginDialogShown = false;
     $rootScope.subActivePath = null;
+    console.log($rootScope.authenticated);
 
     // load app info
     AppInfo.get().then(function (appInfo) {
@@ -361,6 +403,10 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
         httpHeaders.common['appVersion'] = appInfo.version;
         var prevVersion = StorageService.getAppVersion(StorageService.APP_VERSION);
         StorageService.setAppVersion(appInfo.version);
+
+        console.log("stroage Service");
+        console.log(StorageService);
+
 
         if (prevVersion == null || prevVersion !== appInfo.version) {
             $rootScope.clearAndReloadApp();
@@ -415,8 +461,8 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
         $rootScope.requests401 = [];
         $location.url('/home');
 
-
-        $rootScope.loadProfiles();
+        $rootScope.authenticated = true;
+        // $rootScope.loadProfiles();
 
 
     });
@@ -437,12 +483,16 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
                 if (result.data && result.data != null) {
                     var rs = angular.fromJson(result.data);
                     userInfoService.setCurrentUser(rs);
+                    $rootScope.authenticated = true;
                     $rootScope.$broadcast('event:loginConfirmed');
                 } else {
                     userInfoService.setCurrentUser(null);
+                    $rootScope.authenticated = false;
                 }
             }, function () {
                 userInfoService.setCurrentUser(null);
+                $rootScope.authenticated = false;
+
             });
         });
     });
@@ -453,6 +503,8 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
     $rootScope.$on('event:logoutRequest', function () {
         httpHeaders.common['Authorization'] = null;
         userInfoService.setCurrentUser(null);
+        $rootScope.authenticated = false;
+
         $http.get('j_spring_security_logout');
     });
 
@@ -461,6 +513,8 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
      */
     $rootScope.$on('event:loginCancel', function () {
         httpHeaders.common['Authorization'] = null;
+        userInfoService.setCurrentUser(null);
+        $rootScope.authenticated = false;
     });
 
     $rootScope.$on('$routeChangeStart', function (next, current) {
@@ -476,6 +530,7 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
         if (userInfoService.hasCookieInfo() === true) {
             //console.log("found cookie!")
             userInfoService.loadFromCookie();
+            $rootScope.authenticated = true;
             httpHeaders.common['Authorization'] = userInfoService.getHthd();
         }
         else {
@@ -493,10 +548,7 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
     };
 
     $rootScope.getFullName = function () {
-        if (userInfoService.isAuthenticated() === true) {
-            return userInfoService.getFullName();
-        }
-        return '';
+        return  $rootScope.currentUser.fullName;
     };
     $rootScope.clearAndReloadApp = function () {
         $rootScope.clearTemplate();

@@ -39,6 +39,7 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
         //console.log("USER ID=", StorageService.get('userID'));
        
         var loadFromCookie = function() {
+            console.log("Loading from Cookies");
             console.log("UserID=", StorageService.get('userID'));
             console.log("Is Admin?", StorageService.get('admin'));
 
@@ -50,6 +51,8 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
         };
 
         var saveToCookie = function() {
+            console.log("saving to Cookies");
+
             StorageService.set('accountID', id);
             StorageService.set('username', username);
             StorageService.set('author', author);
@@ -59,6 +62,8 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
         };
 
         var clearCookie = function() {
+            console.log("clearing Cookies");
+
             StorageService.remove('accountID');
             StorageService.remove('username');
             StorageService.remove('author');
@@ -78,6 +83,8 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
         };
 
         var hasCookieInfo =  function() {
+            console.log("has cookie info ");
+
             if ( StorageService.get('username') === '' ) {
                 return false;
             }
@@ -164,7 +171,7 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
                 username = '';
                 id = null;
                 fullName = '';
-                //clearCookie();
+               // clearCookie();
             }
         };
 

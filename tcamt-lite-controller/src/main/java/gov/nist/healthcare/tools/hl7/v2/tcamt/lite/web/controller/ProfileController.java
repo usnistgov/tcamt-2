@@ -88,11 +88,11 @@ public class ProfileController extends CommonController {
 				pa.setConformanceContextMetaData(p.getConformanceContext().getMetaData());
 				pa.setIntegrationProfileMetaData(p.getIntegrationProfile().getIntegrationProfileMetaData());
 				pa.setValueSetLibraryMetaData(p.getValueSetLibrary().getMetaData());
-
+				if(p.getIntegrationProfile()!= null && p.getIntegrationProfile().getConformanceProfiles() != null) {
 				for (ConformanceProfile cp : p.getIntegrationProfile().getConformanceProfiles()) {
 					pa.addConformanceProfileMetaData(cp.getConformanceProfileMetaData());
 				}
-
+				}
 				abstractResult.add(pa);
 			}
 
