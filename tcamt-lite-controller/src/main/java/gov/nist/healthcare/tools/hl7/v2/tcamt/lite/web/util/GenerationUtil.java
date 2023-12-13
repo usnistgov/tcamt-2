@@ -1364,10 +1364,10 @@ public class GenerationUtil {
 							.findDatatypeById(dynamicInfo.getDynamicMappingDatatypeId());
 				}
 
-				if (segName == "MSH" && (i + 1) == 1) {
+				if (segName.equals("MSH") && (i + 1) == 1) {
 					fieldStr = "|";
 				}
-				if (segName == "MSH" && (i + 1) == 2) {
+				if (segName.equals("MSH") && (i + 1) == 2) {
 					fieldStr = "^~\\&";
 				}
 				fieldRepeatIndex = fieldRepeatIndex + 1;
@@ -1578,8 +1578,19 @@ public class GenerationUtil {
 			int fieldRepeatIndex = 0;
 
 			String fieldUsagePath = segUsagePath + '-' + field.getUsage();
-			for (int j = 0; j < wholeFieldStr.split("\\~").length; j++) {
-				String fieldStr = wholeFieldStr.split("\\~")[j];
+			
+			String[] splitted = wholeFieldStr.split("\\~");
+			for (int j = 0; j < splitted.length; j++) {
+				String fieldStr = "";
+				
+				if (segName.equals("MSH") && i  == 0) {
+					fieldStr = "|";
+				}else if (segName.equals("MSH") && i  == 1) {
+					fieldStr = "^~\\&";
+				}else {
+					fieldStr = splitted[j];
+				}
+				
 				Datatype fieldDT = profileData.getIntegrationProfile().findDatatypeById(field.getDatatypeId());
 
 				if (dynamicInfo != null && dynamicInfo.getDynamicMappingTarget() != null
@@ -1588,12 +1599,7 @@ public class GenerationUtil {
 					fieldDT = profileData.getIntegrationProfile().findDatatypeById(dynamicInfo.getDynamicMappingDatatypeId());
 				}
 
-				if (segName == "MSH" && (i + 1) == 1) {
-					fieldStr = "|";
-				}
-				if (segName == "MSH" && (i + 1) == 2) {
-					fieldStr = "^~\\&";
-				}
+			
 				fieldRepeatIndex = fieldRepeatIndex + 1;
 				String fieldiPath = "." + (i + 1) + "[" + fieldRepeatIndex + "]";
 
@@ -1797,6 +1803,7 @@ public class GenerationUtil {
 
 	private void createConstraint(String iPositionPath, Categorization cate, String usagePath, Document xmlDoc,
 			String nodeName, String value, Element holderElm, boolean isAtLeastOnce) {
+		
 		if (cate != null) {
 			if (cate.getTestDataCategorization().equals("Indifferent")) {
 			} else if (cate.getTestDataCategorization().equals("NonPresence")) {
@@ -2222,30 +2229,38 @@ public class GenerationUtil {
 
 	private String getFieldStrFromSegment(String segmentName, SegmentInstanceData segmentInstanceData,
 			int fieldPosition) {
+				
 		String segmentStr = segmentInstanceData.getLineStr();
-		if (segmentName.equals("MSH")) {
-			segmentStr = "MSH|FieldSeperator|Encoding|" + segmentStr.substring(9);
-		}
-		String[] wholeFieldStr = segmentStr.split("\\|");
+		
+		return this.getFieldStrFromSegment(segmentStr, fieldPosition);
 
-		if (fieldPosition > wholeFieldStr.length - 1)
-			return "";
-		else
-			return wholeFieldStr[fieldPosition];
 	}
 
 	private String getFieldStrFromSegment(String segmentStr, int fieldPosition) {
-		if (segmentStr.startsWith("MSH")) {
-			segmentStr = "MSH|FieldSeperator|Encoding|" + segmentStr.substring(9);
-		}
-		String[] wholeFieldStr = segmentStr.split("\\|");
-
-		if (fieldPosition > wholeFieldStr.length - 1)
+		
+		if(fieldPosition == 0){
+			//TODO : what do we want to return ?
 			return "";
-		else
-			return wholeFieldStr[fieldPosition];
-	}
 
+		}
+		//Warning: this is not going to work if the field separator is not |
+		if (segmentStr.startsWith("MSH") && fieldPosition == 1 ) {
+			return "|";
+		}
+
+		String[] wholeFieldStr = segmentStr.split("\\|");
+		
+		int returnPosition = segmentStr.startsWith("MSH") ? fieldPosition - 1 : fieldPosition;
+
+		if (returnPosition > wholeFieldStr.length - 1){
+			return "";
+		}
+		else {
+			return wholeFieldStr[returnPosition];
+		}
+		
+	}
+	
 	private boolean isHideForMessageContentByUsage(Segment segment, Field field, String positionPath,
 			ConformanceProfile cp, ProfileData profileData) {
 		if (field.isHide())
@@ -2382,12 +2397,14 @@ public class GenerationUtil {
 					Text value = xmlDoc.createTextNode("|");
 					fieldElm.appendChild(value);
 					segmentElm.appendChild(fieldElm);
-				} else if (fieldStr.equals("%ENCODINGDVIDER%")) {
-					Element fieldElm = (Element) xmlDoc.createElement("MSH.2");
-					Text value = xmlDoc.createTextNode("^~\\&");
-					fieldElm.appendChild(value);
-					segmentElm.appendChild(fieldElm);
-				} else {
+				}
+//				else if (fieldStr.equals("%ENCODINGDVIDER%")) {
+//					Element fieldElm = (Element) xmlDoc.createElement("MSH.2");
+//					Text value = xmlDoc.createTextNode("^~\\&");
+//					fieldElm.appendChild(value);
+//					segmentElm.appendChild(fieldElm);
+//				} 
+				else {
 					if (fieldStr != null && !fieldStr.equals("")) {
 						if (i < segment.getChildren().size()) {
 							Field field = segment.getChildren().get(i);
@@ -2487,12 +2504,15 @@ public class GenerationUtil {
 					Text value = xmlDoc.createTextNode("|");
 					fieldElm.appendChild(value);
 					segmentElm.appendChild(fieldElm);
-				} else if (fieldStr.equals("%ENCODINGDVIDER%")) {
-					Element fieldElm = xmlDoc.createElement("MSH.2");
-					Text value = xmlDoc.createTextNode("^~\\&");
-					fieldElm.appendChild(value);
-					segmentElm.appendChild(fieldElm);
-				} else {
+				}
+//				else if (fieldStr.equals("%ENCODINGDVIDER%")) {
+//					Element fieldElm = xmlDoc.createElement("MSH.2");
+//					Text value = xmlDoc.createTextNode("^~\\&");
+//
+//					fieldElm.appendChild(value);
+//					segmentElm.appendChild(fieldElm);
+//				}
+				else {
 					if (fieldStr != null && !fieldStr.equals("")) {
 						if (i < segment.getChildren().size()) {
 							Field field = segment.getChildren().get(i);
@@ -3202,10 +3222,10 @@ public class GenerationUtil {
 									.findDatatypeById(dynamicInfo.getDynamicMappingDatatypeId());
 						}
 
-						if (segName == "MSH" && (i + 1) == 1) {
+						if (segName.equals("MSH") && (i + 1) == 1) {
 							fieldStr = "|";
 						}
-						if (segName == "MSH" && (i + 1) == 2) {
+						if (segName.equals("MSH") && (i + 1) == 2) {
 							fieldStr = "^~\\&";
 						}
 						fieldRepeatIndex = fieldRepeatIndex + 1;

@@ -44,6 +44,8 @@
   "resolutions": {
     "angular": "1.5.5",
     "froala-wysiwyg-editor": "^2.3.5",
+        "angular-aria" : "1.5.5",
+
 
     "lodash": "~3.10.1"
   },

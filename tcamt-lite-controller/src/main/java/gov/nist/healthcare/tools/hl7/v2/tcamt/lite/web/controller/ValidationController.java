@@ -92,6 +92,7 @@ public class ValidationController {
           ConformanceContext cc = DefaultConformanceContext.apply(confContexts).get();
           report = vp.validate(message, profileXML, cc, valueSetLibrary, conformanceProfileId,
               Context.Free);
+          
         } else if (contextMode.equals("based")) {
           InputStream contextTCAMTXML = new ByteArrayInputStream(testStepConstraintXML.getBytes(StandardCharsets.UTF_8));
           InputStream contextIGAMTXML = new ByteArrayInputStream(constraintsXML.getBytes(StandardCharsets.UTF_8));
@@ -99,6 +100,7 @@ public class ValidationController {
           ConformanceContext cc = DefaultConformanceContext.apply(confContexts).get();
           report = vp.validate(message, profileXML, cc, valueSetLibrary, conformanceProfileId,
               Context.Based);
+          
         }
         response = report.to("json").toString();
         html = report.render("report", null);

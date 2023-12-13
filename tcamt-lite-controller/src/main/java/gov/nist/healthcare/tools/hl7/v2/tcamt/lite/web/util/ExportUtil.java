@@ -19,12 +19,19 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.domain.TestCase;
 import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.domain.TestCaseGroup;
@@ -60,9 +67,9 @@ public class ExportUtil {
 
 	private String genPackagePagesInsideGroup(TestPlan tp, TestCaseGroup group, String packageBodyHTML, String index,
 			TestStoryConfigurationService testStoryConfigurationService, ProfileService profileService)
-			throws Exception {
+					throws Exception {
 		packageBodyHTML = packageBodyHTML + "<A NAME=\"" + index + "\">" + "<h2>" + index + ". " + group.getName()
-				+ "</h2>" + System.getProperty("line.separator");
+		+ "</h2>" + System.getProperty("line.separator");
 		packageBodyHTML = packageBodyHTML + "<span>" + group.getDescription() + "</span>"
 				+ System.getProperty("line.separator");
 		packageBodyHTML = packageBodyHTML + "<h3>" + "Test Story" + "</h3>" + System.getProperty("line.separator");
@@ -103,9 +110,9 @@ public class ExportUtil {
 
 	private String genPackagePagesForTestCase(TestPlan tp, TestCase tc, String packageBodyHTML, String index,
 			TestStoryConfigurationService testStoryConfigurationService, ProfileService profileService)
-			throws Exception {
+					throws Exception {
 		packageBodyHTML = packageBodyHTML + "<A NAME=\"" + index + "\">" + "<h2>" + index + ". " + tc.getName()
-				+ "</h2>" + System.getProperty("line.separator");
+		+ "</h2>" + System.getProperty("line.separator");
 		packageBodyHTML = packageBodyHTML + "<span>" + tc.getDescription() + "</span>"
 				+ System.getProperty("line.separator");
 		packageBodyHTML = packageBodyHTML + "<h3>" + "Test Story" + "</h3>" + System.getProperty("line.separator");
@@ -143,7 +150,7 @@ public class ExportUtil {
 			ProfileService profileService) throws Exception {
 		ClassLoader classLoader = getClass().getClassLoader();
 		packageBodyHTML = packageBodyHTML + "<A NAME=\"" + index + "\">" + "<h2>" + index + ". " + ts.getName()
-				+ "</h2>" + System.getProperty("line.separator");
+		+ "</h2>" + System.getProperty("line.separator");
 		if (tp.getType() != null && tp.getType().equals("Isolated")) {
 			packageBodyHTML = packageBodyHTML + "<span>Test Step Type: " + ts.getType() + "</span><br/>"
 					+ System.getProperty("line.separator");
@@ -228,7 +235,7 @@ public class ExportUtil {
 								+ System.getProperty("line.separator");
 						packageBodyHTML = packageBodyHTML + this.retrieveBodyContent(testDataSpecificationHTMLStr);	
 					}
-					
+
 				}
 
 				if (ts.getJdXSL() != null && !ts.getJdXSL().equals("")) {
@@ -329,7 +336,7 @@ public class ExportUtil {
 													} else {
 														trHTML = trHTML + "<td style=\"text-align: center;\">" + this
 																.changeDateFormat(immunizationForecastLatestDatetoGive)
-																+ "</td>";
+														+ "</td>";
 													}
 													trHTML = trHTML
 															+ "<td style=\"text-align: center;\" bgcolor=\"#F2F2F2\"><textarea maxlength=\"100\" rows=\"1\" style=\"width: 100%; height: 100%; border: 1px; background: 1px  #F2F2F2; resize:vertical; overflow-y:hidden \"></textarea></td>";
@@ -400,7 +407,7 @@ public class ExportUtil {
 													} else {
 														trHTML = trHTML + "<td style=\"text-align: center;\">" + this
 																.changeDateFormat(immunizationHistoryDateAdministered)
-																+ "</td>";
+														+ "</td>";
 													}
 
 													if (immunizationHistoryValidDose.equals("NOT_Found")
@@ -793,7 +800,7 @@ public class ExportUtil {
 					if (tp.isEmptyStoryContentIgnored()) {
 						if (content != null && !"".equals(content))
 							storyContent = storyContent + "<table><tr><th>" + title + "</th></tr><tr><td>" + content
-									+ "</td></tr></table><br/>";
+							+ "</td></tr></table><br/>";
 					} else {
 						storyContent = storyContent + "<table><tr><th>" + title + "</th></tr><tr><td>" + content
 								+ "</td></tr></table><br/>";
@@ -842,7 +849,7 @@ public class ExportUtil {
 
 	public InputStream exportResourceBundlePushRBAsZip(TestPlan tp,
 			TestStoryConfigurationService testStoryConfigurationService, ProfileService profileService)
-			throws Exception {
+					throws Exception {
 		ByteArrayOutputStream outputStream = null;
 		byte[] bytes;
 		outputStream = new ByteArrayOutputStream();
@@ -860,7 +867,7 @@ public class ExportUtil {
 
 	public InputStream exportResourceBundleAsZip(TestPlan tp,
 			TestStoryConfigurationService testStoryConfigurationService, ProfileService profileService)
-			throws Exception {
+					throws Exception {
 		ByteArrayOutputStream outputStream = null;
 		byte[] bytes;
 		outputStream = new ByteArrayOutputStream();
@@ -885,15 +892,28 @@ public class ExportUtil {
 				ProfileData profileData = profileService.findOne(id);
 				if (profileData != null) {
 					this.genProfileAsXML(out, tp, profileData.getId(), this.changeProfileId(profileData.getProfileXMLFileStr(), id, tp.getId()));
+
+					// change constaint file to match ID
 					this.genValueSetAsXML(out, tp, profileData.getId(), this.changeValueSetId(profileData.getValueSetXMLFileStr(), id, tp.getId()));
-					this.genConstraintsAsXML(out, tp, profileData.getId(), this.changeConstraintId(profileData.getConstraintsXMLFileStr(), id, tp.getId()));
+
+					String constraintXML = this.changeConstraintId(profileData.getConstraintsXMLFileStr(), id, tp.getId());
 					
-					if(profileData.getBindingXMLFileStr() != null && !profileData.getBindingXMLFileStr().equals(""))
-						this.genBindingsAsXML(out, tp, profileData.getId(), this.changeBindingsId(profileData.getBindingXMLFileStr(), id, tp.getId()));
-					if(profileData.getCoconstraintsXMLFileStr() != null && !profileData.getCoconstraintsXMLFileStr().equals(""))
+					this.genConstraintsAsXML(out, tp, profileData.getId(),constraintXML);
+
+
+					if(profileData.getBindingXMLFileStr() != null && !profileData.getBindingXMLFileStr().equals("")) {
+						String bindingXML = this.changeBindingsId(profileData.getBindingXMLFileStr(), id, tp.getId());
+					
+						this.genBindingsAsXML(out, tp, profileData.getId(), bindingXML);
+					}
+					if(profileData.getCoconstraintsXMLFileStr() != null && !profileData.getCoconstraintsXMLFileStr().equals("")) {
+
 						this.genCoconstraintsAsXML(out, tp, profileData.getId(), this.changeCoconstraintsId(profileData.getCoconstraintsXMLFileStr(), id, tp.getId()));
-					if(profileData.getSlicingXMLFileStr() != null && !profileData.getSlicingXMLFileStr().equals(""))
+					}
+
+					if(profileData.getSlicingXMLFileStr() != null && !profileData.getSlicingXMLFileStr().equals("")) {
 						this.genSlicingAsXML(out, tp, profileData.getId(), this.changeSlicingId(profileData.getSlicingXMLFileStr(), id, tp.getId()));
+					}
 				}
 
 			}
@@ -908,31 +928,40 @@ public class ExportUtil {
 		bytes = outputStream.toByteArray();
 		return new ByteArrayInputStream(bytes);
 	}
-	
+
 	private String changeSlicingId(String slicingXMLFileStr, String id, String tp_id) throws Exception {
 		Document doc = XMLManager.stringToDom(slicingXMLFileStr);
 		Element elm = (Element) (doc.getElementsByTagName("ProfileSlicing").item(0));
 		if (elm != null) {
 			elm.setAttribute("ID", tp_id + "_" + id + "_S");
 		}
+		this.prefixAttribute("ID", doc, tp_id + "_" + id + "_" , "/ProfileSlicing/SegmentSlicing/Message");
+
+		
 		return XMLManager.docToString(doc);
 	}
-	
+
 	private String changeCoconstraintsId(String coconstraintsXMLFileStr, String id, String tp_id) throws Exception {
 		Document doc = XMLManager.stringToDom(coconstraintsXMLFileStr);
 		Element elm = (Element) (doc.getElementsByTagName("CoConstraintContext").item(0));
 		if (elm != null) {
 			elm.setAttribute("ID", tp_id + "_" + id + "_CC");
 		}
+		this.prefixAttribute("ID", doc, tp_id + "_" + id + "_" , "/CoConstraintContext/ByMessage");
+
 		return XMLManager.docToString(doc);
 	}
-	
+
 	private String changeBindingsId(String bindingXMLFileStr, String id, String tp_id) throws Exception {
 		Document doc = XMLManager.stringToDom(bindingXMLFileStr);
 		Element elm = (Element) (doc.getElementsByTagName("ValueSetBindingsContext").item(0));
 		if (elm != null) {
 			elm.setAttribute("ID", tp_id + "_" + id + "_B");
 		}
+
+		this.prefixAttribute("ID", doc, tp_id + "_" + id + "_" , "/ValueSetBindingsContext/ValueSetBindings/Message/ByID");
+		this.prefixAttribute("ID", doc, tp_id + "_" + id + "_" , "/ValueSetBindingsContext/SingleCodeBindings/Message/ByID");
+
 		return XMLManager.docToString(doc);
 	}
 
@@ -943,9 +972,32 @@ public class ExportUtil {
 			elm.setAttribute("UUID", tp_id + "_" + id + "_C");
 			elm.setAttribute("ID", tp_id + "_" + id + "_C");
 		}
+		this.prefixAttribute("ID", doc, tp_id + "_" + id + "_" , "/ConformanceContext/Constraints/Message/ByID");
+		this.prefixAttribute("ID", doc, tp_id + "_" + id + "_" , "/ConformanceContext/Predicates/Message/ByID");
+
 		return XMLManager.docToString(doc);
 	}
-	
+
+	private void prefixAttribute(String attribute, Document doc, String prefix, String path) throws  Exception{
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		XPathExpression expr = xpath.compile(path);
+
+		NodeList nodeList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+		if(nodeList != null) {
+
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Element element = (Element) nodeList.item(i);
+				String currentId = element.getAttribute(attribute);  
+				element.setAttribute(attribute, prefix + currentId);
+
+			}
+		}
+
+	}
+
+
+
+
 	private String changeValueSetId(String valueSetXMLFileStr, String id, String tp_id) throws Exception {
 		Document doc = XMLManager.stringToDom(valueSetXMLFileStr);
 		Element elm = (Element) (doc.getElementsByTagName("ValueSetLibrary").item(0));
@@ -970,6 +1022,7 @@ public class ExportUtil {
 			if (mElm != null)
 				mElm.setAttribute("ID", tp_id + "_" + id + "_" + mElm.getAttribute("ID"));
 		}
+
 
 		return XMLManager.docToString(doc);
 	}
@@ -1022,7 +1075,7 @@ public class ExportUtil {
 		out.closeEntry();
 		profileIn.close();
 	}
-	
+
 	private void genBindingsAsXML(ZipOutputStream out, TestPlan tp, String id, String bindingXMLFileStr)
 			throws IOException {
 		byte[] buf = new byte[1024];
@@ -1036,7 +1089,7 @@ public class ExportUtil {
 		out.closeEntry();
 		profileIn.close();
 	}
-	
+
 	private void genCoconstraintsAsXML(ZipOutputStream out, TestPlan tp, String id, String coconstraintsXMLFileStr)
 			throws IOException {
 		byte[] buf = new byte[1024];
@@ -1050,7 +1103,7 @@ public class ExportUtil {
 		out.closeEntry();
 		profileIn.close();
 	}
-	
+
 	private void genSlicingAsXML(ZipOutputStream out, TestPlan tp, String id, String slicingXMLFileStr)
 			throws IOException {
 		byte[] buf = new byte[1024];
@@ -1093,7 +1146,7 @@ public class ExportUtil {
 
 	private void genPackagePages(ZipOutputStream out, TestPlan tp,
 			TestStoryConfigurationService testStoryConfigurationService, ProfileService profileService, String rootPath)
-			throws Exception {
+					throws Exception {
 
 		byte[] buf = new byte[1024];
 		out.putNextEntry(new ZipEntry(rootPath + File.separator + "TestPackage.html"));
@@ -1108,7 +1161,7 @@ public class ExportUtil {
 
 	private void generateTestPlanRBTestGroup(ZipOutputStream out, TestCaseGroup group, String path, TestPlan tp,
 			TestStoryConfigurationService testStoryConfigurationService, int index, ProfileService profileService)
-			throws Exception {
+					throws Exception {
 		String groupPath = "";
 		if (path == null) {
 			groupPath = "Contextbased" + File.separator + tp.getName() + File.separator + "TestGroup_" + index;
@@ -1151,7 +1204,7 @@ public class ExportUtil {
 
 	private void generateTestPlanRBTestCase(ZipOutputStream out, TestCase tc, String path, TestPlan tp,
 			TestStoryConfigurationService testStoryConfigurationService, int index, ProfileService profileService)
-			throws Exception {
+					throws Exception {
 		String tcPath = "";
 		if (path == null) {
 			tcPath = tp.getId() + File.separator + "TestCase_" + index;
@@ -1220,7 +1273,7 @@ public class ExportUtil {
 				ts.setEr7Message("");
 			} 
 			this.generateEr7Message(out, ts.getEr7Message() , stepPath);
-		
+
 			TestStepSupplementsParams params = new TestStepSupplementsParams();
 			params.setConformanceProfileId(ts.getConformanceProfileId());
 			params.setEr7Message(ts.getEr7Message());
@@ -1268,7 +1321,7 @@ public class ExportUtil {
 
 	private void generateTestPlanRB(ZipOutputStream out, TestPlan tp,
 			TestStoryConfigurationService testStoryConfigurationService, ProfileService profileService, String rootPath)
-			throws Exception {
+					throws Exception {
 		this.generateTestPlanJsonRB(out, tp, 1, rootPath);
 		String testStoryConfigId = null;
 		if (tp.getTestStoryConfigId() != null) {
@@ -1479,7 +1532,7 @@ public class ExportUtil {
 			hl7v2Obj.put("messageId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_" + ts.getConformanceProfileId());
 			hl7v2Obj.put("constraintId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_C");
 			hl7v2Obj.put("valueSetLibraryId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_VS");
-			
+
 			ProfileData profileData = profileService.findOne(ts.getIntegrationProfileId());
 			if(profileData.getBindingXMLFileStr() != null && !profileData.getBindingXMLFileStr().equals(""))
 				hl7v2Obj.put("bindingId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_B");
@@ -1487,7 +1540,7 @@ public class ExportUtil {
 				hl7v2Obj.put("coConstraintsId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_CC");
 			if(profileData.getSlicingXMLFileStr() != null && !profileData.getSlicingXMLFileStr().equals(""))
 				hl7v2Obj.put("slicingId", tp.getId() + "_" + ts.getIntegrationProfileId() + "_S");
-			
+
 			obj.put("hl7v2", hl7v2Obj);
 		}
 
