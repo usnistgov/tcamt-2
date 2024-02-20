@@ -2072,16 +2072,19 @@ public class GenerationUtil {
 								String wholeFieldStr = this.getFieldStrFromSegment(segName, segmentInstanceData,
 										(i + 1));
 								int fieldRepeatIndex = 0;
-								for (int j = 0; j < wholeFieldStr.split("\\~").length; j++) {
-									String fieldStr = wholeFieldStr.split("\\~")[j];
+								String[] splitted = (segName.equals("MSH") && i == 1) ? new String[] {" ^~\\&"} : wholeFieldStr.split("\\~");
+
+								
+								for (int j = 0; j < splitted.length; j++) {
+									String fieldStr = splitted[j];
 									Datatype fieldDT = profileData.getIntegrationProfile()
 											.findDatatypeById(field.getDatatypeId());
 									if (segName.equals("MSH") && (i + 1) == 1) {
 										fieldStr = "|";
 									}
-									if (segName.equals("MSH") && (i + 1) == 2) {
-										fieldStr = "^~\\&";
-									}
+//									if (segName.equals("MSH") && (i + 1) == 2) {
+//										fieldStr = "^~\\&";
+//									}
 									fieldRepeatIndex = fieldRepeatIndex + 1;
 									String fieldiPath = "." + (i + 1) + "[" + fieldRepeatIndex + "]";
 
