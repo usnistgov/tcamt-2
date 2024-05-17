@@ -12,12 +12,15 @@
 
 package gov.nist.healthcare.tools.hl7.v2.tcamt.lite.web.config;
 
+import java.io.UnsupportedEncodingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.domain.profile.ProfileData;
 import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.service.ProfileService;
 import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.service.TemplateService;
 import gov.nist.healthcare.tools.hl7.v2.tcamt.lite.service.TestPlanService;
@@ -47,11 +50,42 @@ public class Bootstrap implements InitializingBean {
    */
   @Override
   public void afterPropertiesSet() throws Exception {
-
+	  //	this.encodeDecode();
   }
  
 
   public Logger getLogger() {
     return logger;
+  }
+  
+  
+  public void encodeDecode() throws Exception{
+	 ProfileData profile = profileService.findOne("65bd02412d8670360bc31ede");
+	  
+          // The original encoded bytes. In a real scenario, this would come from a file or external source.
+          // For demonstration, we're using a hardcoded string that represents "���" when misinterpreted as UTF-8.
+	 
+          String originalString = profile.getValueSetXMLFileStr();
+
+          // Specify the correct source encoding
+          String sourceEncoding = "ISO-8859-1";
+          // Specify the target encoding
+          String targetEncoding = "UTF-8";
+
+          // Decode the string from the source encoding
+          byte[] bytes = originalString.getBytes(sourceEncoding);
+          String decodedString = new String(bytes, sourceEncoding);
+
+          // Now encode it to the target encoding (UTF-8)
+          byte[] utf8Bytes = decodedString.getBytes(targetEncoding);
+          String encodedToUtf8 = new String(utf8Bytes, targetEncoding);
+
+          // Print the results
+          System.out.println("Decoded String: " + decodedString);
+          System.out.println("Re-encoded to UTF-8: " + encodedToUtf8);
+          profile.setValueSetXMLFileStr(encodedToUtf8);
+         // profileService.save(profile);
+
+      
   }
 }

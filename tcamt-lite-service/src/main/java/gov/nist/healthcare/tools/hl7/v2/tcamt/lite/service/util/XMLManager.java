@@ -44,11 +44,17 @@ public class XMLManager implements Serializable {
 
 	public static Document stringToDom(String xmlSource) throws SAXException,
 			ParserConfigurationException, IOException {
+		
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		factory.setIgnoringComments(false);
 		factory.setIgnoringElementContentWhitespace(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();
+		
+		// String escapedXmlSource = escapeAmpersands(xmlSource);
+		System.out.println("Breaking XML");
+		System.out.println(xmlSource);
+		
 		return builder.parse(new InputSource(new StringReader(xmlSource)));
 	}
 
@@ -285,5 +291,11 @@ public class XMLManager implements Serializable {
 		}
 		is.close();
 		return sb.toString();
+	}
+	
+	private static String escapeAmpersands(String xmlSource) {
+	    // Matches an ampersand followed by anything other than a word character or # (numeric entities) and a semicolon,
+	    // or just the end of the string.
+	    return xmlSource.replaceAll("&(?![A-Za-z]+;|#[0-9]+;|#[xX][0-9a-fA-F]+;)", "&amp;");
 	}
 }

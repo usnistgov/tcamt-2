@@ -150,7 +150,9 @@ public class GenerationUtil {
           for(SegmentInfo si:segmentsInfoList){
         	  if(si.isAnchor() && !si.getUsage().equals(Usage.R)) {
         		  si.setAnchor(false);
+        		  if(segmentsInfoList.indexOf(si)< segmentsInfoList.size()-1) {
         		  segmentsInfoList.get(segmentsInfoList.indexOf(si) + 1).setAnchor(true);
+        		  }
         	  }
           }
 
@@ -646,6 +648,8 @@ public class GenerationUtil {
 			} else {
 				String xslStr = IOUtils
 						.toString(classLoader.getResourceAsStream("xsl" + File.separator + params.getJdXSL() + ".xsl"));
+			
+
 
 				if (xslStr != null && nistXMLStr != null) {
 					InputStream xsltInputStream = new ByteArrayInputStream(xslStr.getBytes());
@@ -656,6 +660,10 @@ public class GenerationUtil {
 
 					String xsltStr = IOUtils.toString(xsltReader);
 					String sourceStr = IOUtils.toString(sourceReader);
+					System.out.println("XSLT");
+					System.out.println(xsltStr);
+					System.out.println("XML");
+					System.out.println(sourceStr);
 
 					result.setJurorDocument(GenerationUtil.parseXmlByXSLT(sourceStr, xsltStr));
 					result.setJurorDocument(result.getJurorDocument().replace("accordion", "uib-accordion"));
@@ -2290,7 +2298,10 @@ public class GenerationUtil {
 					return false;
 				if (p.getFalseUsage().equals(Usage.RE))
 					return false;
+			} else {
+				return false;
 			}
+			return false;
 		}
 		return true;
 	}
@@ -2321,6 +2332,8 @@ public class GenerationUtil {
 					return false;
 				if (p.getFalseUsage().equals(Usage.RE))
 					return false;
+			} else {
+				return false;
 			}
 		}
 		return true;
@@ -2352,6 +2365,8 @@ public class GenerationUtil {
 					return false;
 				if (p.getFalseUsage().equals(Usage.RE))
 					return false;
+			}else {
+				return false;
 			}
 		}
 		return true;
