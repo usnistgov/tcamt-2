@@ -1380,6 +1380,7 @@ public class GenerationUtil {
 				}
 				fieldRepeatIndex = fieldRepeatIndex + 1;
 				String fieldiPath = "." + (i + 1) + "[" + fieldRepeatIndex + "]";
+				String fieldRepeatPath = segmentiPositionPath+ "." + (i + 1) + "[*]";
 
 				if (fieldDT == null || fieldDT.getChildren() == null || fieldDT.getChildren().size() == 0) {
 					FieldOrderIndifferentInfo foiInfo = params.getFieldOrderIndifferentInfoMap().get(this.replaceDot2Dash(segmentiPath + fieldiPath));
@@ -1404,11 +1405,12 @@ public class GenerationUtil {
 								this.createPresenceCheck(subPath(segmentiPositionPath + fieldiPath, startNum), cateOfField, fieldUsagePath, xmlDoc, field.getName(), holderElm);
 								this.createLengthCheck(subPath(segmentiPositionPath + fieldiPath, startNum), cateOfField, fieldUsagePath, xmlDoc, field.getName(), fieldStr, holderElm);
 							} else if (cateOfField.getTestDataCategorization().equals("Value-Test Case Fixed")) {
-								this.createPresenceCheck(subPath(segmentiPositionPath + fieldiPath, startNum), cateOfField, fieldUsagePath, xmlDoc, field.getName(), holderElm);
-								this.createPlainTextCheck((i + 1) + "[*]", cateOfField, fieldUsagePath, xmlDoc, field.getName(), fieldStr, holderElm, true);
+
+								this.createPresenceCheck(subPath(fieldRepeatPath, startNum), cateOfField, fieldUsagePath, xmlDoc, field.getName(), holderElm);
+								this.createPlainTextCheck(subPath(fieldRepeatPath, startNum), cateOfField, fieldUsagePath, xmlDoc, field.getName(), fieldStr, holderElm, true);
 							} else if (cateOfField.getTestDataCategorization().equals("Value-Test Case Fixed List")) {
-								this.createPresenceCheck(subPath(segmentiPositionPath + fieldiPath, startNum), cateOfField, fieldUsagePath, xmlDoc, field.getName(), holderElm);
-								this.createStringListCheck((i + 1) + "[*]", cateOfField, fieldUsagePath, xmlDoc, field.getName(), fieldStr, holderElm, true);
+								this.createPresenceCheck(subPath(fieldRepeatPath, startNum), cateOfField, fieldUsagePath, xmlDoc, field.getName(), holderElm);
+								this.createStringListCheck(subPath(fieldRepeatPath, startNum), cateOfField, fieldUsagePath, xmlDoc, field.getName(), fieldStr, holderElm, true);
 							}
 						}
 					} else {
@@ -1828,6 +1830,7 @@ public class GenerationUtil {
 				this.createPresenceCheck(iPositionPath, cate, usagePath, xmlDoc, nodeName, holderElm);
 				this.createLengthCheck(iPositionPath, cate, usagePath, xmlDoc, nodeName, value, holderElm);
 			} else if (cate.getTestDataCategorization().equals("Value-Test Case Fixed")) {
+		
 				this.createPresenceCheck(iPositionPath, cate, usagePath, xmlDoc, nodeName, holderElm);
 				this.createPlainTextCheck(iPositionPath, cate, usagePath, xmlDoc, nodeName, value, holderElm,
 						isAtLeastOnce);

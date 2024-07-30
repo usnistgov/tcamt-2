@@ -2006,8 +2006,9 @@ public class ExportUtil {
 		}
 
 	}
-
-	private void generateProfileXML(ZipOutputStream out, String id, ProfileService profileService) throws IOException {
+	
+	
+	private void generateProfileXML_old(ZipOutputStream out, String id, ProfileService profileService) throws IOException {
 		ProfileData profileData = profileService.findOne(id);
 
 		if (profileData != null) {
@@ -2046,6 +2047,120 @@ public class ExportUtil {
 			inTP.close();
 		}
 	}
+	
+	private void generateProfileXML(ZipOutputStream out, String id, ProfileService profileService) throws IOException {
+	    ProfileData profileData = profileService.findOne(id);
+
+	    if (profileData != null) {
+	        byte[] buf = new byte[1024];
+
+	        System.out.println("Writing Profile XML...");
+	        writeEntry(out, buf, profileData.getProfileXMLFileStr(), "Global" + File.separator + "Profiles" + File.separator + id + "_Profile.xml");
+
+	        System.out.println("Writing ValueSet XML...");
+	        writeEntry(out, buf, profileData.getValueSetXMLFileStr(), "Global" + File.separator + "Tables" + File.separator + id + "_ValueSet.xml");
+
+	        System.out.println("Writing Constraints XML...");
+	        writeEntry(out, buf, profileData.getConstraintsXMLFileStr(), "Global" + File.separator + "Constraints" + File.separator + id + "_Constraints.xml");
+
+	        System.out.println("Writing Slicing XML...");
+	        writeEntry(out, buf, profileData.getSlicingXMLFileStr(), "Global" + File.separator + "Slicings" + File.separator + id + "_Slicing.xml");
+
+	        System.out.println("Writing CoConstraints XML...");
+	        writeEntry(out, buf, profileData.getCoconstraintsXMLFileStr(), "Global" + File.separator + "CoConstraints" + File.separator + id + "_CoConstraints.xml");
+
+	        System.out.println("Writing Bindings XML...");
+	        writeEntry(out, buf, profileData.getBindingXMLFileStr(), "Global" + File.separator + "Bindings" + File.separator + id + "_Bindings.xml");
+	    }
+	}
+
+	private void writeEntry(ZipOutputStream out, byte[] buf, String xmlContent, String zipEntryName) throws IOException {
+	    if (xmlContent != null) {
+	        System.out.println("Creating entry for: " + zipEntryName);
+	        out.putNextEntry(new ZipEntry(zipEntryName));
+	        try (InputStream inTP = IOUtils.toInputStream(xmlContent)) {
+	            int lenTP;
+	            while ((lenTP = inTP.read(buf)) > 0) {
+	                out.write(buf, 0, lenTP);
+	            }
+	        }
+	        out.closeEntry();
+	    }
+	}
+	
+
+
+//	private void generateProfileXML(ZipOutputStream out, String id, ProfileService profileService) throws IOException {
+//		ProfileData profileData = profileService.findOne(id);
+//
+//		if (profileData != null) {
+//			byte[] buf = new byte[1024];
+//			out.putNextEntry(
+//					new ZipEntry("Global" + File.separator + "Profiles" + File.separator + id + "_Profile.xml"));
+//			InputStream inTP = null;
+//			inTP = IOUtils.toInputStream(profileData.getProfileXMLFileStr());
+//			int lenTP;
+//			while ((lenTP = inTP.read(buf)) > 0) {
+//				out.write(buf, 0, lenTP);
+//			}
+//			out.closeEntry();
+//			inTP.close();
+//
+//			out.putNextEntry(
+//					new ZipEntry("Global" + File.separator + "Tables" + File.separator + id + "_ValueSet.xml"));
+//			inTP = null;
+//			inTP = IOUtils.toInputStream(profileData.getValueSetXMLFileStr());
+//			lenTP = 0;
+//			while ((lenTP = inTP.read(buf)) > 0) {
+//				out.write(buf, 0, lenTP);
+//			}
+//			out.closeEntry();
+//			inTP.close();
+//
+//			out.putNextEntry(
+//					new ZipEntry("Global" + File.separator + "Constraints" + File.separator + id + "_Constraints.xml"));
+//			inTP = null;
+//			inTP = IOUtils.toInputStream(profileData.getConstraintsXMLFileStr());
+//			while ((lenTP = inTP.read(buf)) > 0) {
+//				out.write(buf, 0, lenTP);
+//			}
+//			out.closeEntry();
+//			inTP.close();			
+//			
+//			out.putNextEntry(
+//					new ZipEntry("Global" + File.separator + "CoConstraints" + File.separator + id + "_CoConstraints.xml"));
+//			inTP = null;
+//			inTP = IOUtils.toInputStream(profileData.getCoconstraintsXMLFileStr());
+//			while ((lenTP = inTP.read(buf)) > 0) {
+//				out.write(buf, 0, lenTP);
+//			}
+//			out.closeEntry();
+//			inTP.close();			
+//			
+//			out.putNextEntry(
+//					new ZipEntry("Global" + File.separator + "Slicings" + File.separator + id + "_Slicing.xml"));
+//			inTP = null;
+//			inTP = IOUtils.toInputStream(profileData.getSlicingXMLFileStr());
+//			lenTP = 0;
+//			while ((lenTP = inTP.read(buf)) > 0) {
+//				out.write(buf, 0, lenTP);
+//			}
+//			out.closeEntry();
+//			inTP.close();
+//			
+//			out.putNextEntry(
+//					new ZipEntry("Global" + File.separator + "Bindings" + File.separator + id + "_Bindings.xml"));
+//			inTP = null;
+//			inTP = IOUtils.toInputStream(profileData.getBindingXMLFileStr());
+//			lenTP = 0;
+//			
+//			while ((lenTP = inTP.read(buf)) > 0) {
+//				out.write(buf, 0, lenTP);
+//			}
+//			out.closeEntry();
+//			inTP.close();
+//		}
+//	}
 
 	public String[] generateProfileXML(String id, ProfileService profileService) {
 		ProfileData tcamtProfile = profileService.findOne(id);

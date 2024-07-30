@@ -70,7 +70,7 @@ public class ProfileServiceImpl implements ProfileService {
   private ProfileRepository profileRepository;
 
   @Override
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  //@Transactional(propagation = Propagation.REQUIRES_NEW)
   public ProfileData save(ProfileData data) throws Exception {
     try {
       IntegrationProfile integrationProfile = new IntegrationProfile();

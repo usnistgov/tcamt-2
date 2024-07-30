@@ -466,6 +466,9 @@ public class TestPlanController extends CommonController {
       gp.setProfileXMLStr(pd.getProfileXMLFileStr());
       gp.setConstraintXMLStr(pd.getConstraintsXMLFileStr());
       gp.setValueSetXMLStr(pd.getValueSetXMLFileStr());
+      gp.setBindingXMLFileStr(pd.getBindingXMLFileStr());
+      gp.setSlicingXMLFileStr(pd.getSlicingXMLFileStr());
+      gp.setCoconstraintsXMLFileStr(pd.getCoconstraintsXMLFileStr());
       grandProfiles.add(gp);
     }
     GrandTestPlan grandTestPlan = new GrandTestPlan();
@@ -505,6 +508,10 @@ public class TestPlanController extends CommonController {
         p.setProfileXMLFileStr(gp.getProfileXMLStr());
         p.setConstraintsXMLFileStr(gp.getConstraintXMLStr());
         p.setValueSetXMLFileStr(gp.getValueSetXMLStr());
+        p.setBindingXMLFileStr(gp.getBindingXMLFileStr());
+        p.setSlicingXMLFileStr(gp.getSlicingXMLFileStr());
+        p.setCoconstraintsXMLFileStr(gp.getCoconstraintsXMLFileStr());
+
         p.setAccountId(account.getId());
         p.setLastUpdatedDate(new Date());
         p.setSourceType("private");
