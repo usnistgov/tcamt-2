@@ -431,7 +431,7 @@ public class UserController {
 		// System.out.println("****************** "+url+" *******************");
 
 		// generate and send email
-//		this.sendAccountPasswordResetRequestNotification(acc, url);
+	this.sendAccountPasswordResetRequestNotification(acc, url);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"resetRequestProcessed", acc.getId().toString(), true);
@@ -579,7 +579,7 @@ public class UserController {
 		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ 3 ^^^^^^^^^^^^^^^^^^");
 
 		// send email notification
-//		this.sendResetAccountPasswordNotification(onRecordAccount);
+		this.sendResetAccountPasswordNotification(onRecordAccount);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"accountPasswordReset", onRecordAccount.getId().toString());

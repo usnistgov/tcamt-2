@@ -4984,6 +4984,11 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
             }
         });
 
+        $rootScope.testPrint = function(elm) {
+            console.log("elm ===== ");
+            console.log(elm);
+        }
+
         $rootScope.loadDocument = function () {
             waitingDialog.show('Loading ...', {dialogSize: 'xs', progressType: 'info'});
             $http.get('api/tcamtdocument').then(function(response) {
@@ -5005,7 +5010,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
 
         $rootScope.isAuthenticated = function() {
              return $rootScope.authenticated;
-         }
+        }
 
         $rootScope.compare = function (a,b) {
             if (a.position < b.position)
@@ -7546,6 +7551,7 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         }
     };
     $scope.selectTestStep = function (testStep) {
+        console.log(testStep);
         waitingDialog.hide();
         if (testStep != null) {
             waitingDialog.show('Opening Test Step ...', {dialogSize: 'xs', progressType: 'info'});

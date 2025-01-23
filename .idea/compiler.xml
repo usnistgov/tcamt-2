@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="tcamt-lite-domain" />
+        <module name="tcamt-lite-repo" />
+        <module name="hit-resource-client" />
+        <module name="igamt-lite-acmgt" />
+        <module name="igamt-lite-domain" />
+        <module name="tcamt-lite-service" />
+        <module name="tcamt-lite-controller" />
+        <module name="igamt-lite-controller" />
+        <module name="igamt-lite-service" />
+        <module name="igamt-lite-repo" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

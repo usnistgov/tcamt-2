@@ -1316,6 +1316,7 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
         }
     };
     $scope.selectTestStep = function (testStep) {
+        console.log(testStep);
         waitingDialog.hide();
         if (testStep != null) {
             waitingDialog.show('Opening Test Step ...', {dialogSize: 'xs', progressType: 'info'});
