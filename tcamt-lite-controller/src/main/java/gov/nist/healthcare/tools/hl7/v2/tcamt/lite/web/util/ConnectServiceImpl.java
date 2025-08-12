@@ -195,7 +195,7 @@ public class ConnectServiceImpl implements ConnectService {
       headers.add("Authorization", authorization);
       HttpEntity<String> entity = new HttpEntity<String>("", headers);
       ResponseEntity<String> response =
-          restTemplate.exchange(url + LOGIN_ENDPOINT, HttpMethod.GET, entity, String.class);
+          restTemplate.exchange(url + LOGIN_ENDPOINT, HttpMethod.POST, entity, String.class);
       if (response.getStatusCode() == HttpStatus.OK) {
         return true;
       }
