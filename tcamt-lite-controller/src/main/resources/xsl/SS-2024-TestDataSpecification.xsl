@@ -299,24 +299,41 @@
 			<xsl:value-of select="util:element('Discharge Date/Time', util:format-time(.//PV1.45.1), $ind1)"/>
 		</xsl:if>
 		<!-- Diagnosis -->
-		<xsl:value-of select="util:element('Diagnosis Type', util:valueset(..//DG1.6, 'HL70052'), $ind1)"/>
-		<xsl:for-each select="..//DG1">
-			<xsl:variable name="diagnosis">
-				<xsl:choose>
-					<xsl:when test=".//DG1.3.2  != ''">
-						<xsl:value-of select=".//DG1.3.2"/>
-					</xsl:when>
-					<xsl:when test=".//DG1.3.3  = 'I10C'">
-						<!-- TODO -->
-					</xsl:when>
-					<xsl:when test=".//DG1.3.3 = 'SCT'">
-						<!-- TODO -->
-					</xsl:when>
-				</xsl:choose>
-			</xsl:variable>
-			<xsl:value-of select="util:element('Diagnosis Date/Time', util:format-time(.//DG1.5.1), $ind1)"/>
-			<xsl:value-of select="util:element('Diagnosis', $diagnosis, $ind1)"/>
-		</xsl:for-each>
+		<!-- <xsl:value-of select="util:element('Diagnosis Type', util:valueset(..//DG1.6, 'HL70052'), $ind1)"/> -->
+		<!-- Diagnosis -->
+<xsl:for-each select="..//DG1">
+  <!-- Diagnosis Type per DG1 -->
+  <xsl:value-of select="
+    util:element(
+      'Diagnosis Type',
+      (
+        if (upper-case(normalize-space(.//DG1.6)) = 'W') then 'Working'
+        else if (upper-case(normalize-space(.//DG1.6)) = 'F') then 'Final'
+        else if (upper-case(normalize-space(.//DG1.6)) = 'A') then 'Admitting'
+        else util:valueset(.//DG1.6, 'HL70052')
+      ),
+      $ind1
+    )
+  "/>
+
+  <!-- Diagnosis code -->
+  <xsl:variable name="diagnosis">
+    <xsl:choose>
+      <xsl:when test=".//DG1.3.2 != ''">
+        <xsl:value-of select=".//DG1.3.2"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select=".//DG1.3.1"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
+
+  <!-- Diagnosis Date/Time -->
+  <xsl:value-of select="util:element('Diagnosis Date/Time', util:format-time(.//DG1.5.1), $ind1)"/>
+
+  <!-- Diagnosis -->
+  <xsl:value-of select="util:element('Diagnosis', $diagnosis, $ind1)"/>
+</xsl:for-each>
 		<!-- Procedure -->
 		<xsl:for-each select="..//PR1">
 			<xsl:variable name="procedure">
